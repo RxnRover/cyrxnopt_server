@@ -120,7 +120,7 @@ def main():
     )
     if not venv_m.is_venv():
         venv_m.install_virtual_env()
-        # venv_m.pip_install_r("./requirements.txt")
+        venv_m.pip_install_r("./requirements.txt")
         subprocess.call([venv_m.virtual_python, __file__] + sys.argv[1:])
         exit(0)
 
