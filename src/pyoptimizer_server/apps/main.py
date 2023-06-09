@@ -5,7 +5,13 @@ import subprocess
 import sys
 from typing import Any, Dict
 
-from pyoptimizer_backend.OptimizerController import get_optimizer
+from pyoptimizer_backend.OptimizerController import (
+    check_install,
+    get_config,
+    install,
+    predict,
+    set_config,
+)
 from pyoptimizer_backend.VenvManager import VenvManager
 
 import pyoptimizer_server.config as cfg
@@ -121,6 +127,7 @@ def main():
     if not venv_m.is_venv():
         venv_m.install_virtual_env()
         venv_m.pip_install_r("./requirements.txt")
+        # venv_m.pip_install_e(".")
         subprocess.call([venv_m.virtual_python, __file__] + sys.argv[1:])
         exit(0)
 
@@ -128,12 +135,12 @@ def main():
     with open(os.path.join(args.output_dir, "results.txt"), "w") as fout:
         fout.write("")
 
-    # Get the requested optimizer to use
-    opt = get_optimizer(args.optimizer, venv_m)
+    # # Get the requested optimizer to use
+    # opt = get_optimizer(args.optimizer, venv_m)
 
     # Install the optimizer if it is not already installed
-    if not opt.check_install():
-        opt.install()
+    if not check_install(args.optimizer, venv_m):
+        install(args.optimizer, venv_m)
 
     config_file = os.path.join(args.output_dir, "recent_config.json")
 
@@ -145,7 +152,9 @@ def main():
         #     opt.get_config()
         # )
     if not os.path.exists(config_file):
-        config = cfg.generate_default_config(config_file, opt.get_config())
+        config = cfg.generate_default_config(
+            config_file, get_config(args.optimizer)
+        )
     else:
         # Read the config
         # TODO: This should eventually come from the remote socket
@@ -193,7 +202,7 @@ def main():
 
             config = initial_handshake(socket, config, args.optimizer)
             print(config)
-            opt.set_config(args.output_dir, config)
+            set_config(args.optimizer, args.output_dir, config, venv_m)
 
             # Write initial config information
             config = cfg.load(config_file)
@@ -209,7 +218,15 @@ def main():
 
             # Run the prediction
             try:
-                results = opt.predict([], 0, args.output_dir, config, obj_func)
+                results = predict(
+                    args.optimizer,
+                    [],
+                    0,
+                    args.output_dir,
+                    config,
+                    venv_m,
+                    obj_func,
+                )
             except AbortException as e:
                 socket.send(b"aborted")
                 print(str(e))
