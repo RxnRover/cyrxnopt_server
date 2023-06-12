@@ -99,6 +99,13 @@ def parse_args() -> argparse.Namespace:
             " output_dir."
         ),
     )
+    parser.add_argument(
+        "-n",
+        "--ncycles",
+        default=100,
+        type=int,
+        help=("Number of cycles to run."),
+    )
 
     args = parser.parse_args()
 
@@ -110,7 +117,7 @@ def main():
 
     args = parse_args()
 
-    ROUND_COUNT = 100
+    ROUND_COUNT = args.ncycles
     # TRAINING_STEPS = 20  # For when we use an algorithm that requires
     #                      # training
 
@@ -197,9 +204,8 @@ def main():
             # Write initial config information
             config = cfg.load(config_file)
             config_file_out = os.path.join(round_dir, "config.json")
-            with open(config_file_out, "a") as fout:
+            with open(config_file_out, "w") as fout:
                 fout.write(json.dumps(config, indent=4))
-                fout.write("\n\n")
 
             # Run the prediction
             try:
@@ -232,9 +238,9 @@ def main():
             elif args.optimizer == "SQSnobFit":
                 result_json = json.dumps(
                     {
-                        "value": results[0].optval,
-                        "parameters": results[0].optpar.tolist(),
-                        "steps": len(results[1]),
+                        "value": results.optval,
+                        "parameters": results.optpar.tolist(),
+                        "steps": len(results.history),
                     }
                 ).encode("utf-8")
 
@@ -268,11 +274,12 @@ def write_results(results, results_file, optimizer):
         res_dict["total_iter"] = results.nit
         res_dict["message"] = results.message
     elif optimizer.lower() == "sqsnobfit":
-        res_dict["best_coords"] = results[0].optpar.tolist()
-        res_dict["best_value"] = results[0].optval
-        # res_dict["best_iter"] = "N/A"
-        res_dict["total_iter"] = len(results[1])
+        res_dict["best_coords"] = results.optpar.tolist()
+        res_dict["best_value"] = results.optval
+        res_dict["best_iter"] = find_optimum(results)
+        res_dict["total_iter"] = len(results.history)
         # res_dict["message"] = results.message
+        res_dict["raw_results"] = results.history.tolist()
 
     string = "Results:\n"
     string += "  Best coordinates:   {}\n".format(res_dict["best_coords"])
@@ -281,8 +288,24 @@ def write_results(results, results_file, optimizer):
     string += "  Total iterations:   {}\n".format(res_dict["total_iter"])
     string += "  Message:            {}\n".format(res_dict["message"])
 
-    with open(results_file, "a") as fout:
+    with open(results_file, "w") as fout:
         fout.write(json.dumps(res_dict, indent=4))
+
+
+def find_optimum(results) -> int:
+    # target = results.optpar.tolist()
+    target = results.optval
+
+    for coord in results.history.tolist():
+        # match = True
+        # for i in len(target):
+        #     match = match and target == coord[0]
+        match = target == coord[0]
+
+        if match:
+            return results.history.tolist().index(coord)
+
+    return -1
 
 
 if __name__ == "__main__":
