@@ -73,16 +73,10 @@ def initial_handshake(
     print("options received: {}".format(options))
 
     # Set the options in the configuration
-    if optimizer == "AMLRO":
-        config["param_init"] = initial_parameters
-        config["continuous Feature_Bounds"] = bounds
-        config["continuous Feature_resoultions"] = resolutions
-        config["budget"] = budget
-    else:
-        config["param_init"] = initial_parameters
-        config["bounds"] = bounds
-        config["resolutions"] = resolutions
-        config["budget"] = budget
+    config["param_init"] = initial_parameters
+    config["continuous_feature_bounds"] = bounds
+    config["continuous_feature_resoultions"] = resolutions
+    config["budget"] = budget
 
     return config
 
@@ -132,7 +126,7 @@ def main():
         exit(0)
 
     # Clear results file
-    with open(os.path.join(args.output_dir, "results.txt"), "w") as fout:
+    with open(os.path.join(args.output_dir, "results.json"), "w") as fout:
         fout.write("")
 
     # # Get the requested optimizer to use
@@ -185,14 +179,10 @@ def main():
     ]
     for foo in foos:
         for round in range(ROUND_COUNT):
-            with open(
-                os.path.join(args.output_dir, "results.txt"), "a"
-            ) as fout:
-                fout.write("\n\n")
-                fout.write(
-                    "********** {}, Round {} **********".format(foo, round + 1)
-                )
-                fout.write("\n\n")
+            round_dir = "{}_{}".format(foo, round)
+            round_dir = os.path.join(args.output_dir, round_dir)
+            os.makedirs(round_dir, exist_ok=True)
+            results_file = os.path.join(round_dir, "results.json")
 
             print("Setting function to: {}".format(foo))
             socket.send("function:{}".format(foo).encode("utf-8"))
@@ -202,18 +192,13 @@ def main():
 
             config = initial_handshake(socket, config, args.optimizer)
             print(config)
-            set_config(args.optimizer, args.output_dir, config, venv_m)
+            set_config(args.optimizer, config, args.output_dir, venv_m)
 
             # Write initial config information
             config = cfg.load(config_file)
-            with open(
-                os.path.join(args.output_dir, "results.txt"), "a"
-            ) as fout:
-                fout.write(
-                    "Initial settings:\n{}".format(
-                        json.dumps(config, indent=4)
-                    )
-                )
+            config_file_out = os.path.join(round_dir, "config.json")
+            with open(config_file_out, "a") as fout:
+                fout.write(json.dumps(config, indent=4))
                 fout.write("\n\n")
 
             # Run the prediction
@@ -264,10 +249,10 @@ def main():
             print("*" * 40)
             print("")
 
-            write_results(results, args.output_dir, args.optimizer)
+            write_results(results, results_file, args.optimizer)
 
 
-def write_results(results, output_dir, optimizer):
+def write_results(results, results_file, optimizer):
     res_dict = {
         "best_coords": "N/A",
         "best_value": "N/A",
@@ -277,7 +262,7 @@ def write_results(results, output_dir, optimizer):
         "raw_results": "N/A",
     }
     if optimizer.lower() == "nmsimplex":
-        res_dict["best_coords"] = results.x
+        res_dict["best_coords"] = results.x.tolist()
         res_dict["best_value"] = results.fun
         res_dict["best_iter"] = results.nit
         res_dict["total_iter"] = results.nit
@@ -296,8 +281,8 @@ def write_results(results, output_dir, optimizer):
     string += "  Total iterations:   {}\n".format(res_dict["total_iter"])
     string += "  Message:            {}\n".format(res_dict["message"])
 
-    with open(os.path.join(output_dir, "results.txt"), "a") as fout:
-        fout.write(string)
+    with open(results_file, "a") as fout:
+        fout.write(json.dumps(res_dict, indent=4))
 
 
 if __name__ == "__main__":
