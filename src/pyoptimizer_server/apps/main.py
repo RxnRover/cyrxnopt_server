@@ -76,7 +76,10 @@ def initial_handshake(
     config["param_init"] = initial_parameters
     config["continuous_feature_bounds"] = bounds
     config["continuous_feature_resoultions"] = resolutions
-    config["budget"] = budget
+    config["budget"] = 1000
+
+    if optimizer == "NMSimplex":
+        config["xatol"] = 0.01
 
     return config
 
@@ -132,9 +135,9 @@ def main():
         subprocess.call([venv_m.virtual_python, __file__] + sys.argv[1:])
         exit(0)
 
-    # Clear results file
-    with open(os.path.join(args.output_dir, "results.json"), "w") as fout:
-        fout.write("")
+    # # Clear results file
+    # with open(os.path.join(args.output_dir, "results.json"), "w") as fout:
+    #     fout.write("")
 
     # # Get the requested optimizer to use
     # opt = get_optimizer(args.optimizer, venv_m)
@@ -174,15 +177,28 @@ def main():
     results = None
 
     foos = [
+        "beale",
+        "booth",
         "branin",
+        "bukin_n6",
+        "eggholder",
         "goldstein_price",
-        "hartmann",
+        "hartmann3D",
+        "hartmann6D",
+        "himmelblau",
+        "holder_table",
+        "matyas",
         "rosenbrock",
+        "schwefel2D",
+        "schwefel3D",
         "shekel5",
         "shekel7",
         "shekel10",
         "shubert",
         "six_hump_camel",
+        "sphere",
+        "styblinski_tang_3D",
+        "three_hump_camel",
     ]
     for foo in foos:
         for round in range(ROUND_COUNT):
@@ -235,6 +251,18 @@ def main():
                         "steps": results.nit,
                     }
                 ).encode("utf-8")
+            elif args.optimizer == "NMSimplexLMFit":
+                params = [
+                    value
+                    for value in list(results.params.valuesdict().values())
+                ]
+                result_json = json.dumps(
+                    {
+                        "value": 0,
+                        "parameters": params,
+                        "steps": results.nfev,
+                    }
+                ).encode("utf-8")
             elif args.optimizer == "SQSnobFit":
                 result_json = json.dumps(
                     {
@@ -243,6 +271,10 @@ def main():
                         "steps": len(results.history),
                     }
                 ).encode("utf-8")
+            else:
+                raise ValueError(
+                    "Invalid optimizer name: {}".format(args.optimizer)
+                )
 
             socket.send(result_json)
             socket.recv()
@@ -255,10 +287,10 @@ def main():
             print("*" * 40)
             print("")
 
-            write_results(results, results_file, args.optimizer)
+            write_results(results, config, results_file, args.optimizer)
 
 
-def write_results(results, results_file, optimizer):
+def write_results(results, config, results_file, optimizer):
     res_dict = {
         "best_coords": "N/A",
         "best_value": "N/A",
@@ -273,6 +305,15 @@ def write_results(results, results_file, optimizer):
         res_dict["best_iter"] = results.nit
         res_dict["total_iter"] = results.nit
         res_dict["message"] = results.message
+    elif optimizer.lower() == "nmsimplexlmfit":
+        params = [
+            value for value in list(results.params.valuesdict().values())
+        ]
+        res_dict["best_coords"] = params
+        res_dict["best_value"] = 0
+        res_dict["best_iter"] = results.nfev
+        res_dict["total_iter"] = results.nfev
+        res_dict["message"] = results.message
     elif optimizer.lower() == "sqsnobfit":
         res_dict["best_coords"] = results.optpar.tolist()
         res_dict["best_value"] = results.optval
@@ -280,6 +321,9 @@ def write_results(results, results_file, optimizer):
         res_dict["total_iter"] = len(results.history)
         # res_dict["message"] = results.message
         res_dict["raw_results"] = results.history.tolist()
+
+    # Add the config options onto the results dictionary for context
+    res_dict = res_dict | config
 
     string = "Results:\n"
     string += "  Best coordinates:   {}\n".format(res_dict["best_coords"])

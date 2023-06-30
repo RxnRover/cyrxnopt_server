@@ -3,13 +3,24 @@ import random
 
 # import numpy as np
 import zmq
+from benchmarking.functions.beale import beale
+from benchmarking.functions.booth import booth
 from benchmarking.functions.branin import branin
+from benchmarking.functions.bukin_n6 import bukin_n6
+from benchmarking.functions.eggholder import eggholder
 from benchmarking.functions.goldstein_price import goldstein_price
 from benchmarking.functions.hartmann import hartmann
+from benchmarking.functions.himmelblau import himmelblau
+from benchmarking.functions.holder_table import holder_table
+from benchmarking.functions.matyas import matyas
 from benchmarking.functions.rosenbrock import rosenbrock
+from benchmarking.functions.schwefel import schwefel
 from benchmarking.functions.shekel import shekel
 from benchmarking.functions.shubert import shubert
 from benchmarking.functions.six_hump_camel import six_hump_camel
+from benchmarking.functions.sphere import sphere
+from benchmarking.functions.styblinski_tang import styblinski_tang
+from benchmarking.functions.three_hump_camel import three_hump_camel
 
 
 # TODO: Move this into a unit test, probably
@@ -35,7 +46,7 @@ def main():
     bounds = [[-5.000001, 10], [0, 15]]
     resolutions = [0.1] * dim
 
-    abort_count = 1000
+    abort_count = 10000
     abort_i = 0
     while True:
         #  Wait for ready from the optimizer
@@ -66,7 +77,7 @@ def main():
             reply = json.dumps(resolutions).encode("utf-8")
 
         elif request == b"budget":
-            reply = json.dumps(100).encode("utf-8")
+            reply = json.dumps(99).encode("utf-8")
 
         elif request == b"options":
             reply = json.dumps(
@@ -83,26 +94,76 @@ def main():
 
             # Reply with the function name
             reply = request.encode("utf-8")
-            if request == "branin":
+            if request == "beale":
+                foo = beale
+                dim = 2
+                bounds = [[-4.5, 4.5]] * dim
+                resolutions = [0.1] * dim
+            elif request == "booth":
+                foo = booth
+                dim = 2
+                bounds = [[-10, 10]] * dim
+                resolutions = [0.1] * dim
+            elif request == "branin":
                 foo = branin
                 dim = 2
                 bounds = [[-5.000001, 10], [0, 15]]
+                resolutions = [0.1] * dim
+            elif request == "bukin_n6":
+                foo = bukin_n6
+                dim = 2
+                bounds = [[-15, -5], [-3, 3]]
+                resolutions = [0.1] * dim
+            elif request == "eggholder":
+                foo = eggholder
+                dim = 2
+                bounds = [[-512, 512]] * dim
                 resolutions = [0.1] * dim
             elif request == "goldstein_price":
                 foo = goldstein_price
                 dim = 2
                 bounds = [[-2, 2]] * 2
                 resolutions = [0.1] * dim
-            elif request == "hartmann":
+            elif request == "hartmann3D":
                 foo = hartmann
                 dim = 3  # limited to 3 or 6
                 bounds = [[0, 1]] * dim
                 resolutions = [0.1] * dim
+            elif request == "hartmann6D":
+                foo = hartmann
+                dim = 6  # limited to 3 or 6
+                bounds = [[0, 1]] * dim
+                resolutions = [0.1] * dim
+            elif request == "himmelblau":
+                foo = himmelblau
+                dim = 2
+                bounds = [[-5, 5]] * dim
+                resolutions = [0.1] * dim
+            elif request == "holder_table":
+                foo = holder_table
+                dim = 2
+                bounds = [[-10, 10]] * dim
+                resolutions = [0.1] * dim
+            elif request == "matyas":
+                foo = matyas
+                dim = 2
+                bounds = [[-10, 10]] * dim
+                resolutions = [0.1] * dim
             elif request == "rosenbrock":
                 foo = rosenbrock
-                dim = 4  # Any number of dims
-                bounds = [[-5.000001, 10]] * dim
+                dim = 3  # Any number of dims
+                bounds = [[-10, 10]] * dim
                 resolutions = [0.1] * dim
+            elif request == "schwefel2D":
+                foo = schwefel
+                dim = 2
+                bounds = [[-500, 500]] * dim
+                resolutions = [1] * dim
+            elif request == "schwefel3D":
+                foo = schwefel
+                dim = 3
+                bounds = [[-500, 500]] * dim
+                resolutions = [1] * dim
             elif request == "shekel5":
                 foo = shekel
                 dim = 4
@@ -130,6 +191,21 @@ def main():
                 foo = six_hump_camel
                 dim = 2
                 bounds = [[-3, 3], [-2, 2]]
+                resolutions = [0.1] * dim
+            elif request == "sphere":
+                foo = sphere
+                dim = 3
+                bounds = [[-100, 100]] * dim
+                resolutions = [0.1] * dim
+            elif request == "styblinski_tang_3D":
+                foo = styblinski_tang
+                dim = 3
+                bounds = [[-5, 5]] * dim
+                resolutions = [0.1] * dim
+            elif request == "three_hump_camel":
+                foo = three_hump_camel
+                dim = 2
+                bounds = [[-5, 5]] * dim
                 resolutions = [0.1] * dim
             else:
                 reply = b"invalid_function"
