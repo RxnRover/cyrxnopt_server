@@ -258,8 +258,7 @@ def main():
         elif type(json.loads(request)) == list:
             if foo == shekel:
                 result = foo(json.loads(request), m)
-            elif data_file is None:
-                print("interpolation...")
+            elif data_file is not None:
                 result = foo(points, values, json.loads(request))
             else:
                 result = foo(json.loads(request))
