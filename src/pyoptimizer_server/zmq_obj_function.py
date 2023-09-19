@@ -1,9 +1,7 @@
 import json
 from typing import List
 
-import numpy as np
 import zmq
-from lmfit import Parameters
 
 from pyoptimizer_server.AbortException import AbortException
 
@@ -42,21 +40,9 @@ class zmq_obj_function:
         :rtype: float
         """
 
-        if isinstance(x, Parameters):
-            print("Converting Parameters object to List")
-            param_dict = x.valuesdict()
-            x = []
-
-            for param_name in param_dict.keys():
-                x.append(param_dict[param_name])
-
-            print("Converted x to", x)
-        elif isinstance(x, np.ndarray):
-            x = x.tolist()
-
         print("Sending parameters: {}".format(x))
 
-        self.socket.send(json.dumps(x).encode("utf-8"))
+        self.socket.send(json.dumps(x.tolist()).encode("utf-8"))
 
         reply = self.socket.recv()
         print("Received reply: {}".format(reply))

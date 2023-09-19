@@ -1,5 +1,4 @@
 -e ../pyoptimizer_backend
 -e ../benchmarking
 -e .
-lmfit
 zmq
