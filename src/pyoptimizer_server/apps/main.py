@@ -74,7 +74,7 @@ def initial_handshake(
     config["param_init"] = initial_parameters
     config["continuous"]["bounds"] = bounds
     config["continuous"]["resolutions"] = resolutions
-    config["budget"] = 1000
+    config["budget"] = 100
 
     if optimizer == "NMSimplex":
         config["xatol"] = 0.01
@@ -118,7 +118,7 @@ def main():
 
     args = parse_args()
 
-    ROUND_COUNT = args.cycles
+    CYCLE_COUNT = args.cycles
     # TRAINING_STEPS = 20  # For when we use an algorithm that requires
     #                      # training
 
@@ -165,36 +165,54 @@ def main():
 
     results = None
 
-    # foos = [
-    #     "beale",
-    #     "booth",
+    # args.functions = [
+    #     # "beale",
+    #     # "booth",
     #     "branin",
-    #     "bukin_n6",
-    #     "eggholder",
+    #     # "bukin_n6",
+    #     # "eggholder",
     #     "goldstein_price",
     #     "hartmann3D",
     #     "hartmann6D",
-    #     "himmelblau",
-    #     "holder_table",
-    #     "matyas",
+    #     # "himmelblau",
+    #     # "holder_table",
+    #     # "matyas",
     #     "rosenbrock",
-    #     "schwefel2D",
-    #     "schwefel3D",
+    #     # "schwefel2D",
+    #     # "schwefel3D",
     #     "shekel5",
     #     "shekel7",
     #     "shekel10",
     #     "shubert",
     #     "six_hump_camel",
-    #     "sphere",
-    #     "styblinski_tang_3D",
-    #     "three_hump_camel",
+    #     # "sphere",
+    #     # "styblinski_tang_3D",
+    #     # "three_hump_camel",
     # ]
     for foo in args.functions:
-        for round in range(ROUND_COUNT):
-            round_dir = "{}_{}".format(foo, round)
-            round_dir = os.path.join(args.data_dir, round_dir)
-            os.makedirs(round_dir, exist_ok=True)
-            results_file = os.path.join(round_dir, "results.json")
+        if foo == "interpolate":
+            if args.datafile == "":
+                raise RuntimeError(
+                    "When running with the 'interpolate' function, an existing"
+                    "'data_file' must also be provided."
+                )
+            elif not os.path.exists(args.datafile):
+                raise RuntimeError(
+                    "The provided 'data_file' does not exist. data_file: "
+                    "{}".format(args.datafile)
+                )
+
+            print("Setting data_file to: {}".format(args.datafile))
+            socket.send("data_file:{}".format(args.datafile).encode("utf-8"))
+            data_file_resp = socket.recv().decode("utf-8")
+            print("data_file response: {}".format(data_file_resp))
+            assert data_file_resp == args.datafile
+
+        for cycle in range(CYCLE_COUNT):
+            cycle_dir = "{}_{}".format(foo, cycle)
+            cycle_dir = os.path.join(args.data_dir, cycle_dir)
+            os.makedirs(cycle_dir, exist_ok=True)
+            results_file = os.path.join(cycle_dir, "results.json")
 
             print("Setting function to: {}".format(foo))
             socket.send("function:{}".format(foo).encode("utf-8"))
@@ -208,7 +226,7 @@ def main():
 
             # Write initial config information
             config = cfg.load(config_file)
-            config_file_out = os.path.join(round_dir, "config.json")
+            config_file_out = os.path.join(cycle_dir, "config.json")
             with open(config_file_out, "w") as fout:
                 fout.write(json.dumps(config, indent=4))
 
@@ -218,7 +236,7 @@ def main():
                     args.optimizer,
                     [],
                     0,
-                    round_dir,
+                    cycle_dir,
                     config,
                     venv_m,
                     obj_func,
@@ -269,7 +287,7 @@ def main():
             socket.recv()
 
             print(
-                "Results for {}, round {}:\n{}".format(foo, round + 1, results)
+                "Results for {}, cycle {}:\n{}".format(foo, cycle + 1, results)
             )
 
             print("")
@@ -361,6 +379,13 @@ def parse_args() -> argparse.Namespace:
         default=1,
         type=int,
         help=("Number of cycles to run for the optimizer on the function."),
+    )
+    parser.add_argument(
+        "-d",
+        "--datafile",
+        default="",
+        type=str,
+        help=("Data file to read from for interpolation functions."),
     )
     parser.add_argument(
         "-cs",
