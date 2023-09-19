@@ -22,7 +22,15 @@ def generate_default_config(filename: str, config_desc):
         if isinstance(option_value, list) and option_type.find("list") == -1:
             default_value = option_value[0]
 
-        config[option_name] = default_value
+        # Entries that are prefixed by "continuous" or "categorical" need
+        # to be split up
+        if "continuous" in option_name or "categorical" in option_name:
+            name_parts = option_name.split("_")
+            if not name_parts[0] in config:
+                config[name_parts[0]] = {}
+            config[name_parts[0]]["_".join(name_parts[1:])] = default_value
+        else:
+            config[option_name] = default_value
 
     try:
         fout = open(filename, "w")

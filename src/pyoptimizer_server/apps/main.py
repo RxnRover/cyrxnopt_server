@@ -1,10 +1,9 @@
 import argparse
 import json
 import os
-import subprocess
-import sys
 from typing import Any, Dict
 
+from pyoptimizer_backend.NestedVenv import NestedVenv
 from pyoptimizer_backend.OptimizerController import (
     check_install,
     get_config,
@@ -12,7 +11,6 @@ from pyoptimizer_backend.OptimizerController import (
     predict,
     set_config,
 )
-from pyoptimizer_backend.VenvManager import VenvManager
 
 import pyoptimizer_server.config as cfg
 from pyoptimizer_server.AbortException import AbortException
@@ -73,42 +71,46 @@ def initial_handshake(
     print("options received: {}".format(options))
 
     # Set the options in the configuration
-    if optimizer == "AMLRO":
-        config["param_init"] = initial_parameters
-        config["continuous Feature_Bounds"] = bounds
-        config["continuous Feature_resoultions"] = resolutions
-        config["budget"] = budget
-    else:
-        config["param_init"] = initial_parameters
-        config["bounds"] = bounds
-        config["resolutions"] = resolutions
-        config["budget"] = budget
+    config["param_init"] = initial_parameters
+    config["continuous"]["bounds"] = bounds
+    config["continuous"]["resolutions"] = resolutions
+    config["budget"] = 1000
+
+    if optimizer == "NMSimplex":
+        config["xatol"] = 0.01
 
     return config
 
 
-def parse_args() -> argparse.Namespace:
-    """Parse command line arguments"""
+# def parse_args() -> argparse.Namespace:
+#     """Parse command line arguments"""
 
-    parser = argparse.ArgumentParser()
+#     parser = argparse.ArgumentParser()
 
-    # parser.add_argument(
-    #     "config_file", help="Location of the configuration file to use."
-    # )
-    parser.add_argument("output_dir", help="Location for output data.")
-    parser.add_argument("optimizer", help="Optimizer to use.")
-    parser.add_argument(
-        "--default-config",
-        action="store_true",
-        help=(
-            "Generate config file with default values at the location given by"
-            " output_dir."
-        ),
-    )
+#     # parser.add_argument(
+#     #     "config_file", help="Location of the configuration file to use."
+#     # )
+#     parser.add_argument("output_dir", help="Location for output data.")
+#     parser.add_argument("optimizer", help="Optimizer to use.")
+#     parser.add_argument(
+#         "--default-config",
+#         action="store_true",
+#         help=(
+#             "Generate config file with default values at the location given"
+#             " by output_dir."
+#         ),
+#     )
+#     parser.add_argument(
+#         "-n",
+#         "--ncycles",
+#         default=100,
+#         type=int,
+#         help=("Number of cycles to run."),
+#     )
 
-    args = parser.parse_args()
+#     args = parser.parse_args()
 
-    return args
+#     return args
 
 
 def main():
@@ -116,41 +118,32 @@ def main():
 
     args = parse_args()
 
-    ROUND_COUNT = 100
+    ROUND_COUNT = args.cycles
     # TRAINING_STEPS = 20  # For when we use an algorithm that requires
     #                      # training
 
     # Set up virtual environment
-    venv_m = VenvManager(
-        os.path.join(args.output_dir, "venv_{}".format(args.optimizer))
-    )
-    if not venv_m.is_venv():
-        venv_m.install_virtual_env()
-        venv_m.pip_install_r("./requirements.txt")
-        # venv_m.pip_install_e(".")
-        subprocess.call([venv_m.virtual_python, __file__] + sys.argv[1:])
-        exit(0)
-
-    # Clear results file
-    with open(os.path.join(args.output_dir, "results.txt"), "w") as fout:
-        fout.write("")
-
-    # # Get the requested optimizer to use
-    # opt = get_optimizer(args.optimizer, venv_m)
+    venv_dir = os.path.join(args.data_dir, "venv_{}".format(args.optimizer))
+    venv_m = NestedVenv(venv_dir)
+    if not os.path.exists(venv_dir):
+        print("Creating virtual environment at:", venv_dir)
+        venv_m.create()
+    print("Activating virtual environment at:", venv_dir)
+    venv_m.activate()
 
     # Install the optimizer if it is not already installed
     if not check_install(args.optimizer, venv_m):
         install(args.optimizer, venv_m)
 
-    config_file = os.path.join(args.output_dir, "recent_config.json")
+    config_file = os.path.join(args.data_dir, "recent_config.json")
 
     # Optionally generate a default config file
-    if args.default_config:
-        raise RuntimeError("--default-config flag not yet supported.")
-        # cfg.generate_default_config(
-        #     os.path.join(args.output_dir, "recent_config.json"),
-        #     opt.get_config()
-        # )
+    # if args.default_config:
+    #     raise RuntimeError("--default-config flag not yet supported.")
+    #     # cfg.generate_default_config(
+    #     #     os.path.join(args.data_dir, "recent_config.json"),
+    #     #     opt.get_config()
+    #     # )
     if not os.path.exists(config_file):
         config = cfg.generate_default_config(
             config_file, get_config(args.optimizer)
@@ -166,33 +159,42 @@ def main():
     address = "tcp://localhost:5555"
     socket = zmq_helpers.init_socket(address)
 
-    # opt.set_config(args.output_dir, config)
+    # opt.set_config(args.data_dir, config)
 
     obj_func = zmq_obj_function(socket, config["direction"])
 
     results = None
 
-    foos = [
-        "branin",
-        "goldstein_price",
-        "hartmann",
-        "rosenbrock",
-        "shekel5",
-        "shekel7",
-        "shekel10",
-        "shubert",
-        "six_hump_camel",
-    ]
-    for foo in foos:
+    # foos = [
+    #     "beale",
+    #     "booth",
+    #     "branin",
+    #     "bukin_n6",
+    #     "eggholder",
+    #     "goldstein_price",
+    #     "hartmann3D",
+    #     "hartmann6D",
+    #     "himmelblau",
+    #     "holder_table",
+    #     "matyas",
+    #     "rosenbrock",
+    #     "schwefel2D",
+    #     "schwefel3D",
+    #     "shekel5",
+    #     "shekel7",
+    #     "shekel10",
+    #     "shubert",
+    #     "six_hump_camel",
+    #     "sphere",
+    #     "styblinski_tang_3D",
+    #     "three_hump_camel",
+    # ]
+    for foo in args.functions:
         for round in range(ROUND_COUNT):
-            with open(
-                os.path.join(args.output_dir, "results.txt"), "a"
-            ) as fout:
-                fout.write("\n\n")
-                fout.write(
-                    "********** {}, Round {} **********".format(foo, round + 1)
-                )
-                fout.write("\n\n")
+            round_dir = "{}_{}".format(foo, round)
+            round_dir = os.path.join(args.data_dir, round_dir)
+            os.makedirs(round_dir, exist_ok=True)
+            results_file = os.path.join(round_dir, "results.json")
 
             print("Setting function to: {}".format(foo))
             socket.send("function:{}".format(foo).encode("utf-8"))
@@ -202,19 +204,13 @@ def main():
 
             config = initial_handshake(socket, config, args.optimizer)
             print(config)
-            set_config(args.optimizer, args.output_dir, config, venv_m)
+            set_config(args.optimizer, config, args.data_dir, venv_m)
 
             # Write initial config information
             config = cfg.load(config_file)
-            with open(
-                os.path.join(args.output_dir, "results.txt"), "a"
-            ) as fout:
-                fout.write(
-                    "Initial settings:\n{}".format(
-                        json.dumps(config, indent=4)
-                    )
-                )
-                fout.write("\n\n")
+            config_file_out = os.path.join(round_dir, "config.json")
+            with open(config_file_out, "w") as fout:
+                fout.write(json.dumps(config, indent=4))
 
             # Run the prediction
             try:
@@ -222,7 +218,7 @@ def main():
                     args.optimizer,
                     [],
                     0,
-                    args.output_dir,
+                    round_dir,
                     config,
                     venv_m,
                     obj_func,
@@ -244,14 +240,30 @@ def main():
                         "steps": results.nit,
                     }
                 ).encode("utf-8")
+            elif args.optimizer == "NMSimplexLMFit":
+                params = [
+                    value
+                    for value in list(results.params.valuesdict().values())
+                ]
+                result_json = json.dumps(
+                    {
+                        "value": 0,
+                        "parameters": params,
+                        "steps": results.nfev,
+                    }
+                ).encode("utf-8")
             elif args.optimizer == "SQSnobFit":
                 result_json = json.dumps(
                     {
-                        "value": results[0].optval,
-                        "parameters": results[0].optpar.tolist(),
-                        "steps": len(results[1]),
+                        "value": results.optval,
+                        "parameters": results.optpar.tolist(),
+                        "steps": len(results.history),
                     }
                 ).encode("utf-8")
+            else:
+                raise ValueError(
+                    "Invalid optimizer name: {}".format(args.optimizer)
+                )
 
             socket.send(result_json)
             socket.recv()
@@ -264,10 +276,10 @@ def main():
             print("*" * 40)
             print("")
 
-            write_results(results, args.output_dir, args.optimizer)
+            write_results(results, config, results_file, args.optimizer)
 
 
-def write_results(results, output_dir, optimizer):
+def write_results(results, config, results_file, optimizer):
     res_dict = {
         "best_coords": "N/A",
         "best_value": "N/A",
@@ -277,17 +289,31 @@ def write_results(results, output_dir, optimizer):
         "raw_results": "N/A",
     }
     if optimizer.lower() == "nmsimplex":
-        res_dict["best_coords"] = results.x
+        res_dict["best_coords"] = results.x.tolist()
         res_dict["best_value"] = results.fun
         res_dict["best_iter"] = results.nit
         res_dict["total_iter"] = results.nit
         res_dict["message"] = results.message
+        res_dict["raw_results"] = results.raw_results
+    elif optimizer.lower() == "nmsimplexlmfit":
+        params = [
+            value for value in list(results.params.valuesdict().values())
+        ]
+        res_dict["best_coords"] = params
+        res_dict["best_value"] = 0
+        res_dict["best_iter"] = results.nfev
+        res_dict["total_iter"] = results.nfev
+        res_dict["message"] = results.message
     elif optimizer.lower() == "sqsnobfit":
-        res_dict["best_coords"] = results[0].optpar.tolist()
-        res_dict["best_value"] = results[0].optval
-        # res_dict["best_iter"] = "N/A"
-        res_dict["total_iter"] = len(results[1])
+        res_dict["best_coords"] = results.optpar.tolist()
+        res_dict["best_value"] = results.optval
+        res_dict["best_iter"] = find_optimum(results)
+        res_dict["total_iter"] = len(results.history)
         # res_dict["message"] = results.message
+        res_dict["raw_results"] = results.history.tolist()
+
+    # Add the config options onto the results dictionary for context
+    res_dict = res_dict | config
 
     string = "Results:\n"
     string += "  Best coordinates:   {}\n".format(res_dict["best_coords"])
@@ -296,8 +322,78 @@ def write_results(results, output_dir, optimizer):
     string += "  Total iterations:   {}\n".format(res_dict["total_iter"])
     string += "  Message:            {}\n".format(res_dict["message"])
 
-    with open(os.path.join(output_dir, "results.txt"), "a") as fout:
-        fout.write(string)
+    with open(results_file, "w") as fout:
+        fout.write(json.dumps(res_dict, indent=4))
+
+
+def find_optimum(results) -> int:
+    # target = results.optpar.tolist()
+    target = results.optval
+
+    for coord in results.history.tolist():
+        # match = True
+        # for i in len(target):
+        #     match = match and target == coord[0]
+        match = target == coord[0]
+
+        if match:
+            return results.history.tolist().index(coord)
+
+    return -1
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments"""
+
+    parser = argparse.ArgumentParser()
+
+    # parser.add_argument("output_dir", help="Location for output data.")
+    parser.add_argument("optimizer", help="Optimizer to use.")
+    parser.add_argument(
+        "data_dir", help="Location for results file to analyze."
+    )
+    parser.add_argument(
+        "functions", nargs="+", help="Benchmarking functions to use."
+    )
+    parser.add_argument(
+        "-c",
+        "--cycles",
+        default=1,
+        type=int,
+        help=("Number of cycles to run for the optimizer on the function."),
+    )
+    parser.add_argument(
+        "-cs",
+        "--cyclestart",
+        default=0,
+        type=int,
+        help=(
+            "The starting number for cycles to append to the data directories."
+        ),
+    )
+    parser.add_argument(
+        "-t",
+        "--training-steps",
+        dest="training_steps",
+        default=20,
+        type=int,
+        help=(
+            "Number of training steps to perform in each cycle if "
+            "training is needed."
+        ),
+    )
+    parser.add_argument(
+        "-p",
+        "--predict-steps",
+        dest="predict_steps",
+        default=2,
+        type=int,
+        help=("Number of prediction steps to perform in each cycle."),
+    )
+
+    args = parser.parse_args()
+
+    return args
 
 
 if __name__ == "__main__":
