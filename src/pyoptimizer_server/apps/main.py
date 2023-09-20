@@ -190,18 +190,7 @@ def main():
     #     # "three_hump_camel",
     # ]
     for foo in args.functions:
-        if foo == "interpolate":
-            if args.datafile == "":
-                raise RuntimeError(
-                    "When running with the 'interpolate' function, an existing"
-                    "'data_file' must also be provided."
-                )
-            elif not os.path.exists(args.datafile):
-                raise RuntimeError(
-                    "The provided 'data_file' does not exist. data_file: "
-                    "{}".format(args.datafile)
-                )
-
+        if args.datafile != "":
             print("Setting data_file to: {}".format(args.datafile))
             socket.send("data_file:{}".format(args.datafile).encode("utf-8"))
             data_file_resp = socket.recv().decode("utf-8")
@@ -214,11 +203,15 @@ def main():
             os.makedirs(cycle_dir, exist_ok=True)
             results_file = os.path.join(cycle_dir, "results.json")
 
-            print("Setting function to: {}".format(foo))
-            socket.send("function:{}".format(foo).encode("utf-8"))
+            foo_remote = foo
+            if foo == "imine":
+                foo_remote = "interpolate"
+
+            print("Setting function to: {}".format(foo_remote))
+            socket.send("function:{}".format(foo_remote).encode("utf-8"))
             foo_resp = socket.recv().decode("utf-8")
             print("Function response: {}".format(foo_resp))
-            assert foo_resp == foo
+            assert foo_resp == foo_remote
 
             config = initial_handshake(socket, config, args.optimizer)
             print(config)

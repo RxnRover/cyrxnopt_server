@@ -225,7 +225,7 @@ def main():
             elif request == "interpolate":
                 foo = griddata.point
                 dim = 3
-                bounds = [[0.05, 3.0], [0.05, 3.0], [10, 82]]
+                bounds = [[0.05, 0.3], [0.05, 0.3], [10, 80]]
                 resolutions = [0.01, 0.01, 2.0]
                 points, values = get_interpolate_data(data_file)
             else:
@@ -259,7 +259,7 @@ def main():
             if foo == shekel:
                 result = foo(json.loads(request), m)
             elif data_file is not None:
-                result = foo(points, values, json.loads(request))
+                result = -foo(points, values, json.loads(request))
             else:
                 result = foo(json.loads(request))
             reply = json.dumps(result).encode("utf-8")
