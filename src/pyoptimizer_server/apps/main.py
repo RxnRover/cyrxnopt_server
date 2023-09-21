@@ -82,37 +82,6 @@ def initial_handshake(
     return config
 
 
-# def parse_args() -> argparse.Namespace:
-#     """Parse command line arguments"""
-
-#     parser = argparse.ArgumentParser()
-
-#     # parser.add_argument(
-#     #     "config_file", help="Location of the configuration file to use."
-#     # )
-#     parser.add_argument("output_dir", help="Location for output data.")
-#     parser.add_argument("optimizer", help="Optimizer to use.")
-#     parser.add_argument(
-#         "--default-config",
-#         action="store_true",
-#         help=(
-#             "Generate config file with default values at the location given"
-#             " by output_dir."
-#         ),
-#     )
-#     parser.add_argument(
-#         "-n",
-#         "--ncycles",
-#         default=100,
-#         type=int,
-#         help=("Number of cycles to run."),
-#     )
-
-#     args = parser.parse_args()
-
-#     return args
-
-
 def main():
     """Starting point for using an optimizer with zmq"""
 
