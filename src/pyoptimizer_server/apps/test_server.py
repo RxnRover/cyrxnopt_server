@@ -1,7 +1,8 @@
 import json
 import random
 
-# import numpy as np
+import numpy as np
+import pandas as pd
 import zmq
 from benchmarking.functions.beale import beale
 from benchmarking.functions.booth import booth
@@ -21,6 +22,22 @@ from benchmarking.functions.six_hump_camel import six_hump_camel
 from benchmarking.functions.sphere import sphere
 from benchmarking.functions.styblinski_tang import styblinski_tang
 from benchmarking.functions.three_hump_camel import three_hump_camel
+from data_tools.interpolate import griddata
+
+
+def get_interpolate_data(data_file: str):
+    # Loading reaction adata set
+    rxn_data = pd.read_csv(data_file)
+    # rxn_data = rxn_data.drop(rxn_data.columns[2], axis=1)
+    points = np.array(
+        rxn_data.drop(rxn_data.columns[-1], axis=1).values.tolist()
+    )
+    values = np.array(rxn_data[rxn_data.columns[-1]].values.tolist())
+
+    # print('points',points.shape)
+    # print('values',values.shape)
+
+    return [points, values]
 
 
 # TODO: Move this into a unit test, probably
@@ -45,6 +62,7 @@ def main():
     m = 5
     bounds = [[-5.000001, 10], [0, 15]]
     resolutions = [0.1] * dim
+    interpolate_val = None
 
     abort_count = 10000
     abort_i = 0
@@ -69,6 +87,10 @@ def main():
                 initial_params.append(param)
 
             reply = json.dumps(initial_params).encode("utf-8")
+
+        elif request == b"continuous_feature_names":
+            names = ["f{}".format(i + 1) for i in range(dim)]
+            reply = json.dumps(names).encode("utf-8")
 
         elif request == b"bounds":
             reply = json.dumps(bounds).encode("utf-8")
@@ -207,6 +229,14 @@ def main():
                 dim = 2
                 bounds = [[-5, 5]] * dim
                 resolutions = [0.1] * dim
+            elif request == "pk":
+                foo = griddata.point
+                dim = 2
+                bounds = [[1.3, 12.9], [25, 74]]
+                resolutions = [0.1, 1]
+                interpolate_val = get_interpolate_data(
+                    "data/20230927_pk_transientflow_full_reaction_data.csv"
+                )
             else:
                 reply = b"invalid_function"
                 bounds = []
@@ -237,6 +267,10 @@ def main():
         elif type(json.loads(request)) == list:
             if foo == shekel:
                 result = foo(json.loads(request), m)
+            elif foo == griddata.point:
+                result = -griddata.point(
+                    interpolate_val[0], interpolate_val[1], json.loads(request)
+                )
             else:
                 result = foo(json.loads(request))
             reply = json.dumps(result).encode("utf-8")

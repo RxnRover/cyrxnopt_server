@@ -42,7 +42,10 @@ class zmq_obj_function:
 
         print("Sending parameters: {}".format(x))
 
-        self.socket.send(json.dumps(x.tolist()).encode("utf-8"))
+        if type(x) is not list:
+            x = x.tolist()
+
+        self.socket.send(json.dumps(x).encode("utf-8"))
 
         reply = self.socket.recv()
         print("Received reply: {}".format(reply))

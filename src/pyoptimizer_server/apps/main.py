@@ -8,13 +8,14 @@ from pyoptimizer_backend.OptimizerController import (
     check_install,
     get_config,
     install,
-    predict,
     set_config,
 )
 
 import pyoptimizer_server.config as cfg
 from pyoptimizer_server.AbortException import AbortException
 from pyoptimizer_server.helpers import zmq_helpers
+from pyoptimizer_server.helpers.predict_server import predict_server
+from pyoptimizer_server.helpers.train_server import train_server
 from pyoptimizer_server.zmq_obj_function import zmq_obj_function
 
 
@@ -33,6 +34,15 @@ def initial_handshake(
     reply = socket.recv()
     initial_parameters = json.loads(reply)
     print("Initial parameters received: {}".format(initial_parameters))
+
+    # Request continuous feature names
+    print("Sending continuous feature names request")
+    socket.send(b"continuous_feature_names")
+
+    # Receive continuous feature names
+    reply = socket.recv()
+    continuous_feature_names = json.loads(reply)
+    print("Feature names received: {}".format(continuous_feature_names))
 
     # Request bounds
     print("Sending bounds request")
@@ -72,9 +82,10 @@ def initial_handshake(
 
     # Set the options in the configuration
     config["param_init"] = initial_parameters
-    config["continuous"]["bounds"] = bounds
-    config["continuous"]["resolutions"] = resolutions
-    config["budget"] = 1000
+    config["continuous_feature_names"] = continuous_feature_names
+    config["continuous_feature_bounds"] = bounds
+    config["continuous_feature_resolutions"] = resolutions
+    config["budget"] = budget
 
     if optimizer == "NMSimplex":
         config["xatol"] = 0.01
@@ -88,8 +99,6 @@ def main():
     args = parse_args()
 
     ROUND_COUNT = args.cycles
-    # TRAINING_STEPS = 20  # For when we use an algorithm that requires
-    #                      # training
 
     # Set up virtual environment
     venv_dir = os.path.join(args.data_dir, "venv_{}".format(args.optimizer))
@@ -102,7 +111,7 @@ def main():
 
     # Install the optimizer if it is not already installed
     if not check_install(args.optimizer, venv_m):
-        install(args.optimizer, venv_m)
+        install(args.optimizer, venv_m, local_paths={"amlro": "../amlo"})
 
     config_file = os.path.join(args.data_dir, "recent_config.json")
 
@@ -160,6 +169,7 @@ def main():
     # ]
     for foo in args.functions:
         for round in range(ROUND_COUNT):
+            round += args.cyclestart
             round_dir = "{}_{}".format(foo, round)
             round_dir = os.path.join(args.data_dir, round_dir)
             os.makedirs(round_dir, exist_ok=True)
@@ -173,20 +183,39 @@ def main():
 
             config = initial_handshake(socket, config, args.optimizer)
             print(config)
-            set_config(args.optimizer, config, args.data_dir, venv_m)
+            set_config(args.optimizer, config, round_dir, venv_m)
 
             # Write initial config information
-            config = cfg.load(config_file)
+            # config = cfg.load(config_file)
             config_file_out = os.path.join(round_dir, "config.json")
             with open(config_file_out, "w") as fout:
                 fout.write(json.dumps(config, indent=4))
 
+            prev_params = []
+            yield_value = 0
+            if args.training_steps > 0:
+                try:
+                    prev_params, yield_value = train_server(
+                        args.optimizer,
+                        [],
+                        0,
+                        args.training_steps,
+                        round_dir,
+                        config,
+                        venv_m,
+                        obj_func,
+                    )
+                except AbortException as e:
+                    socket.send(b"aborted")
+                    print(str(e))
+                    return
+
             # Run the prediction
             try:
-                results = predict(
+                results = predict_server(
                     args.optimizer,
-                    [],
-                    0,
+                    prev_params,
+                    yield_value,
                     round_dir,
                     config,
                     venv_m,
@@ -201,7 +230,7 @@ def main():
             # TODO: Not sure if this is necessary
             # if config["direction"] == "max":
             #     results.optval = -results.optval
-            if args.optimizer == "NMSimplex":
+            if args.optimizer.lower() == "nmsimplex":
                 result_json = json.dumps(
                     {
                         "value": results.fun,
@@ -209,7 +238,7 @@ def main():
                         "steps": results.nit,
                     }
                 ).encode("utf-8")
-            elif args.optimizer == "NMSimplexLMFit":
+            elif args.optimizer.lower() == "nmsimplexlmfit":
                 params = [
                     value
                     for value in list(results.params.valuesdict().values())
@@ -221,12 +250,20 @@ def main():
                         "steps": results.nfev,
                     }
                 ).encode("utf-8")
-            elif args.optimizer == "SQSnobFit":
+            elif args.optimizer.lower() == "sqsnobfit":
                 result_json = json.dumps(
                     {
                         "value": results.optval,
                         "parameters": results.optpar.tolist(),
                         "steps": len(results.history),
+                    }
+                ).encode("utf-8")
+            elif args.optimizer.lower() == "amlro":
+                result_json = json.dumps(
+                    {
+                        "value": results["best_value"],
+                        "parameters": results["best_coords"],
+                        "steps": results["best_iter"],
                     }
                 ).encode("utf-8")
             else:
@@ -280,6 +317,13 @@ def write_results(results, config, results_file, optimizer):
         res_dict["total_iter"] = len(results.history)
         # res_dict["message"] = results.message
         res_dict["raw_results"] = results.history.tolist()
+    elif optimizer.lower() == "amlro":
+        res_dict["best_coords"] = results["best_coords"]
+        res_dict["best_value"] = results["best_value"]
+        res_dict["best_iter"] = results["best_iter"]
+        res_dict["total_iter"] = results["total_iter"]
+        # res_dict["message"] = results.message
+        res_dict["raw_results"] = results["raw_results"]
 
     # Add the config options onto the results dictionary for context
     res_dict = res_dict | config
