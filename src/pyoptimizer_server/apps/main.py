@@ -271,6 +271,14 @@ def main():
                         "steps": results["best_iter"],
                     }
                 ).encode("utf-8")
+            elif args.optimizer.lower() == "edbop":
+                result_json = json.dumps(
+                    {
+                        "value": results["best_value"],
+                        "parameters": results["best_coords"],
+                        "steps": results["best_iter"],
+                    }
+                ).encode("utf-8")
             else:
                 raise ValueError(
                     "Invalid optimizer name: {}".format(args.optimizer)
@@ -323,6 +331,13 @@ def write_results(results, config, results_file, optimizer):
         # res_dict["message"] = results.message
         res_dict["raw_results"] = results.history.tolist()
     elif optimizer.lower() == "amlro":
+        res_dict["best_coords"] = results["best_coords"]
+        res_dict["best_value"] = results["best_value"]
+        res_dict["best_iter"] = results["best_iter"]
+        res_dict["total_iter"] = results["total_iter"]
+        # res_dict["message"] = results.message
+        res_dict["raw_results"] = results["raw_results"]
+    elif optimizer.lower() == "edbop":
         res_dict["best_coords"] = results["best_coords"]
         res_dict["best_value"] = results["best_value"]
         res_dict["best_iter"] = results["best_iter"]
