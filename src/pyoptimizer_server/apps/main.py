@@ -111,7 +111,11 @@ def main():
 
     # Install the optimizer if it is not already installed
     if not check_install(args.optimizer, venv_m):
-        install(args.optimizer, venv_m, local_paths={"amlro": "../amlo"})
+        install(
+            args.optimizer,
+            venv_m,
+            local_paths={"amlro": "../amlo", "edboplus": "deps/edbop"},
+        )
 
     config_file = os.path.join(args.data_dir, "recent_config.json")
 
