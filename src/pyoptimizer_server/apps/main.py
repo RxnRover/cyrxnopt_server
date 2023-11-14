@@ -86,6 +86,7 @@ def initial_handshake(
     config["continuous_feature_bounds"] = bounds
     config["continuous_feature_resolutions"] = resolutions
     config["budget"] = budget
+    config["direction"] = "min"
 
     if optimizer == "NMSimplex":
         config["xatol"] = 0.01
