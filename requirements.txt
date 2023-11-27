@@ -1,4 +1,4 @@
--e ../pyoptimizer_backend
+-e ../cyrxnopt
 -e ../benchmarking
 -e .
 zmq

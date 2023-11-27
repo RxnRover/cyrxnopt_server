@@ -1,4 +1,4 @@
-from pyoptimizer_backend.OptimizerController import predict
+from cyrxnopt.OptimizerController import predict
 
 # TODO: Rename this variable
 problematic_optimizers = [

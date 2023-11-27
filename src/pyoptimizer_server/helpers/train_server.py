@@ -1,4 +1,4 @@
-from pyoptimizer_backend.OptimizerController import train
+from cyrxnopt.OptimizerController import train
 
 problematic_optimizers = [
     "amlro",

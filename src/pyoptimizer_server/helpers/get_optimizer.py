@@ -1,7 +1,7 @@
-from pyoptimizer_backend.OptimizerABC import OptimizerABC
-from pyoptimizer_backend.OptimizerAmlro import OptimizerAmlro
-from pyoptimizer_backend.OptimizerNMSimplex import OptimizerNMSimplex
-from pyoptimizer_backend.VenvManager import VenvManager
+from cyrxnopt.OptimizerABC import OptimizerABC
+from cyrxnopt.OptimizerAmlro import OptimizerAmlro
+from cyrxnopt.OptimizerNMSimplex import OptimizerNMSimplex
+from cyrxnopt.VenvManager import VenvManager
 
 
 def get_optimizer(
@@ -14,12 +14,12 @@ def get_optimizer(
     :type optimizer_name: str
     :param venv: Virtual environment to install the optimizer into,
                  defaults to None
-    :type venv: pyoptimizer_backend.VenvManager, optional
+    :type venv: cyrxnopt.VenvManager, optional
 
     :raises ValueError: Invalid optimizer name.
 
     :return: Optimizer instance for the provided name.
-    :rtype: pyoptimizer_backend.OptimizerABC
+    :rtype: cyrxnopt.OptimizerABC
     """
 
     # Add optimizers here in alphabetical order

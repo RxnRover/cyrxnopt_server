@@ -3,8 +3,8 @@ import json
 import os
 from typing import Any, Dict
 
-from pyoptimizer_backend.NestedVenv import NestedVenv
-from pyoptimizer_backend.OptimizerController import (
+from cyrxnopt.NestedVenv import NestedVenv
+from cyrxnopt.OptimizerController import (
     check_install,
     get_config,
     install,
