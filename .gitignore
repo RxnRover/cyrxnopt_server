@@ -55,3 +55,4 @@ MANIFEST
 
 # Common local testing
 tmp/
+data/
