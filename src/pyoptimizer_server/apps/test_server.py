@@ -237,6 +237,46 @@ def main():
                 interpolate_val = get_interpolate_data(
                     "data/20230927_pk_transientflow_full_reaction_data.csv"
                 )
+            elif request == "aldol_yield_product":
+                foo = griddata.point
+                dim = 4
+                bounds = [[25, 59], [5.1, 14.9], [1.1, 9.9], [0.03, 0.19]]
+                resolutions = [1, 0.1, 0.1, 0.01]
+                interpolate_val = get_interpolate_data(
+                    "data/20231114_aldolcondensation_yield_product.csv"
+                )
+            elif request == "aldol_yield_dba":
+                foo = griddata.point
+                dim = 4
+                bounds = [[25, 59], [5.1, 14.9], [1.1, 9.9], [0.03, 0.19]]
+                resolutions = [1, 0.1, 0.1, 0.01]
+                interpolate_val = get_interpolate_data(
+                    "data/20231114_aldolcondensation_yield_dba.csv"
+                )
+            elif request == "aldol_sty":
+                foo = griddata.point
+                dim = 4
+                bounds = [[25, 59], [5.1, 14.9], [1.1, 9.9], [0.03, 0.19]]
+                resolutions = [1, 0.1, 0.1, 0.01]
+                interpolate_val = get_interpolate_data(
+                    "data/20231114_aldolcondensation_sty.csv"
+                )
+            elif request == "aldol_lit_sty":
+                foo = griddata.point
+                dim = 4
+                bounds = [[30, 70], [5, 15], [1.27, 10], [0.02, 0.2]]
+                resolutions = [1, 0.1, 0.1, 0.01]
+                interpolate_val = get_interpolate_data(
+                    "data/20231114_aldolcondensation_lit_sty.csv"
+                )
+            elif request == "aldol_lit_efactor":
+                foo = griddata.point
+                dim = 4
+                bounds = [[30, 70], [5, 15], [1.27, 10], [0.02, 0.2]]
+                resolutions = [1, 0.1, 0.1, 0.01]
+                interpolate_val = get_interpolate_data(
+                    "data/20231114_aldolcondensation_lit_efactor.csv"
+                )
             else:
                 reply = b"invalid_function"
                 bounds = []
