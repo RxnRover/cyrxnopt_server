@@ -56,3 +56,5 @@ MANIFEST
 # Common local testing
 tmp/
 data/
+job_script_*
+slurm-*
