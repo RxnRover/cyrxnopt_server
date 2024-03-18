@@ -43,7 +43,7 @@ def initial_handshake(
     reply = socket.recv()
     continuous_feature_names = json.loads(reply)
     print("Feature names received: {}".format(continuous_feature_names))
-
+    
     # Request bounds
     print("Sending bounds request")
     socket.send(b"bounds")
@@ -62,6 +62,22 @@ def initial_handshake(
     resolutions = json.loads(reply)
     print("Resolutions received: {}".format(resolutions))
 
+    # print("Sending categorical feature names request")
+    # socket.send(b"categorical_feature_names")
+
+    # reply = socket.recv()
+    # categorical_feature_names = json.loads(reply)
+    # print("Feature names received: {}".format(categorical_feature_names))
+
+    # Request categorical feature values
+    # print("Sending categorical feature values request")
+    # socket.send(b"categorical_feature_values")
+
+    # Receive continuous feature names
+    # reply = socket.recv()
+    # categorical_feature_values = json.loads(reply)
+    # print("Categorical feature values received: {}".format(categorical_feature_values))
+    
     # Request budget
     print("Sending budget request")
     socket.send(b"budget")
@@ -85,6 +101,8 @@ def initial_handshake(
     config["continuous_feature_names"] = continuous_feature_names
     config["continuous_feature_bounds"] = bounds
     config["continuous_feature_resolutions"] = resolutions
+    # config["categorical_feature_names"] = categorical_feature_names
+    # config["categorical_feature_values"] = categorical_feature_values
     config["budget"] = budget
     config["direction"] = "min"
 
@@ -144,6 +162,8 @@ def main():
 
     # opt.set_config(args.data_dir, config)
 
+    if (type(config["direction"]) is list):
+        config["direction"] = config["direction"][0]
     obj_func = zmq_obj_function(socket, config["direction"])
 
     results = None
@@ -187,15 +207,16 @@ def main():
             assert foo_resp == foo
 
             config = initial_handshake(socket, config, args.optimizer)
-            print(config)
             set_config(args.optimizer, config, round_dir, venv_m)
-
+            with open(os.path.join(round_dir, "config.json")) as fin:
+                config = json.load(fin)
+            
             # Write initial config information
             # config = cfg.load(config_file)
-            config_file_out = os.path.join(round_dir, "config.json")
-            with open(config_file_out, "w") as fout:
-                fout.write(json.dumps(config, indent=4))
-
+            # config_file_out = os.path.join(round_dir, "config.json")
+            # with open(config_file_out, "w") as fout:
+            #     fout.write(json.dumps(config, indent=4))
+            
             prev_params = []
             yield_value = 0
             if args.training_steps > 0:
