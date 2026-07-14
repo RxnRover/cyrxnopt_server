@@ -12,11 +12,11 @@ from cyrxnopt.OptimizerController import (
 )
 from cyrxnopt.utilities.predict_server import predict_server
 from cyrxnopt.utilities.train_server import train_server
+from cyrxnopt.utilities.zmq import zmq_helpers
+from cyrxnopt.utilities.zmq.zmq_obj_function import zmq_obj_function
 
 import pyoptimizer_server.config as cfg
 from pyoptimizer_server.AbortException import AbortException
-from pyoptimizer_server.helpers import zmq_helpers
-from pyoptimizer_server.zmq_obj_function import zmq_obj_function
 
 
 def initial_handshake(
