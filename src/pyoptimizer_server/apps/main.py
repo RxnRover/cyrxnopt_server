@@ -20,7 +20,7 @@ from pyoptimizer_server.zmq_obj_function import zmq_obj_function
 
 
 def initial_handshake(
-    socket, config: Dict[str, Any], optimizer
+    socket, config: Dict[str, Any], optimizer: str
 ) -> Dict[str, Any]:
     """Performs the initial handshake that get initialization data before
     starting the optimization.
@@ -130,11 +130,14 @@ def main():
 
     # Install the optimizer if it is not already installed
     if not check_install(args.optimizer, venv_m):
+        print(f"{args.optimizer} installation not found. Installing...")
         install(
             args.optimizer,
             venv_m,
             local_paths={"amlro": "../amlo", "edboplus": "deps/edbop"},
         )
+    else:
+        print(f"{args.optimizer} Install found. Skipping install.")
 
     config_file = os.path.join(args.data_dir, "recent_config.json")
 
@@ -220,6 +223,7 @@ def main():
             prev_params = []
             yield_value = 0
             if args.training_steps > 0:
+                print("===== Training =====")
                 try:
                     prev_params, yield_value = train_server(
                         args.optimizer,
@@ -238,6 +242,7 @@ def main():
 
             # Run the prediction
             try:
+                print("===== Prediction =====")
                 results = predict_server(
                     args.optimizer,
                     prev_params,
