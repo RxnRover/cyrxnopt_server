@@ -49,8 +49,8 @@ cover/*
 MANIFEST
 
 # Per-project virtualenvs
-.venv*/
-.conda*/
+**/*venv*/
+**/*conda*/
 .python-version
 
 # Common local testing
