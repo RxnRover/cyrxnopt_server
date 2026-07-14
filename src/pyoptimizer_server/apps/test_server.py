@@ -231,7 +231,7 @@ def main():
                 dim = 2
                 bounds = [[-5, 5]] * dim
                 resolutions = [0.1] * dim
-            elif request == "pk":
+            elif request == "pk1":
                 foo = griddata.point
                 dim = 2
                 bounds = [[1.3, 12.9], [25, 74]]
@@ -243,7 +243,7 @@ def main():
                 foo = griddata.point
                 dim = 4
                 bounds = [[25, 59], [5.1, 14.9], [1.1, 9.9], [0.03, 0.19]]
-                resolutions = [1, 0.1, 0.1, 0.01]
+                resolutions = [1.7, 0.49, 0.44, 0.008]
                 interpolate_val = get_interpolate_data(
                     "data/20231114_aldolcondensation_yield_product.csv"
                 )
@@ -251,7 +251,7 @@ def main():
                 foo = griddata.point
                 dim = 4
                 bounds = [[25, 59], [5.1, 14.9], [1.1, 9.9], [0.03, 0.19]]
-                resolutions = [1, 0.1, 0.1, 0.01]
+                resolutions = [1.7, 0.49, 0.44, 0.008]
                 interpolate_val = get_interpolate_data(
                     "data/20231114_aldolcondensation_yield_dba.csv"
                 )
@@ -259,7 +259,7 @@ def main():
                 foo = griddata.point
                 dim = 4
                 bounds = [[25, 59], [5.1, 14.9], [1.1, 9.9], [0.03, 0.19]]
-                resolutions = [1, 0.1, 0.1, 0.01]
+                resolutions = [1.7, 0.49, 0.44, 0.008]
                 interpolate_val = get_interpolate_data(
                     "data/20231114_aldolcondensation_sty.csv"
                 )
@@ -267,7 +267,7 @@ def main():
                 foo = griddata.point
                 dim = 4
                 bounds = [[30, 70], [5, 15], [1.27, 10], [0.02, 0.2]]
-                resolutions = [1, 0.1, 0.1, 0.01]
+                resolutions = [1.7, 0.49, 0.44, 0.008]
                 interpolate_val = get_interpolate_data(
                     "data/20231114_aldolcondensation_lit_sty.csv"
                 )
@@ -275,9 +275,222 @@ def main():
                 foo = griddata.point
                 dim = 4
                 bounds = [[30, 70], [5, 15], [1.27, 10], [0.02, 0.2]]
-                resolutions = [1, 0.1, 0.1, 0.01]
+                resolutions = [1.7, 0.49, 0.44, 0.008]
                 interpolate_val = get_interpolate_data(
                     "data/20231114_aldolcondensation_lit_efactor.csv"
+                )
+            elif request == "jensen_paper_case_1_ton":
+                foo = griddata.point
+                dim = 4
+                bounds = [[0, 7.1], [60, 600.1], [30, 110.1], [0.496, 2.5151]]
+                resolutions = [1, 54, 8, 0.2019]
+                categorical_feature_names = ["catalysts"]
+                categorical_feature_values = [
+                    [
+                        "P1-L1",
+                        "P1-L2",
+                        "P1-L3",
+                        "P1-L4",
+                        "P1-L5",
+                        "P1-L6",
+                        "P1-L7",
+                        "P2-L1",
+                    ]
+                ]
+                interpolate_val = get_interpolate_data(
+                    "data/jensen_paper/case_1_ton.csv"
+                )
+            elif request == "jensen_paper_case_1_yield":
+                foo = griddata.point
+                dim = 4
+                bounds = [[0, 7.1], [60, 600.1], [30, 110.1], [0.496, 2.5151]]
+                resolutions = [1, 54, 8, 0.2019]
+                categorical_feature_names = ["catalysts"]
+                categorical_feature_values = [
+                    [
+                        "P1-L1",
+                        "P1-L2",
+                        "P1-L3",
+                        "P1-L4",
+                        "P1-L5",
+                        "P1-L6",
+                        "P1-L7",
+                        "P2-L1",
+                    ]
+                ]
+                interpolate_val = get_interpolate_data(
+                    "data/jensen_paper/case_1_yield.csv"
+                )
+            elif request == "jensen_paper_case_2_ton":
+                foo = griddata.point
+                dim = 4
+                bounds = [[0, 7.1], [60, 600.1], [30, 110.1], [0.492, 2.5161]]
+                resolutions = [1, 54, 8, 0.2024]
+                categorical_feature_names = ["catalysts"]
+                categorical_feature_values = [
+                    [
+                        "P1-L1",
+                        "P1-L2",
+                        "P1-L3",
+                        "P1-L4",
+                        "P1-L5",
+                        "P1-L6",
+                        "P1-L7",
+                        "P2-L1",
+                    ]
+                ]
+                interpolate_val = get_interpolate_data(
+                    "data/jensen_paper/case_2_ton.csv"
+                )
+            elif request == "jensen_paper_case_2_yield":
+                foo = griddata.point
+                dim = 4
+                bounds = [[0, 7.1], [60, 600.1], [30, 110.1], [0.492, 2.5161]]
+                resolutions = [1, 54, 8, 0.2024]
+                categorical_feature_names = ["catalysts"]
+                categorical_feature_values = [
+                    [
+                        "P1-L1",
+                        "P1-L2",
+                        "P1-L3",
+                        "P1-L4",
+                        "P1-L5",
+                        "P1-L6",
+                        "P1-L7",
+                        "P2-L1",
+                    ]
+                ]
+                interpolate_val = get_interpolate_data(
+                    "data/jensen_paper/case_2_yield.csv"
+                )
+            elif request == "jensen_paper_case_3_ton":
+                foo = griddata.point
+                dim = 4
+                bounds = [[0, 7.1], [60, 600.1], [30, 110.1], [0.499, 2.5151]]
+                resolutions = [1, 54, 8, 0.2016]
+                categorical_feature_names = ["catalysts"]
+                categorical_feature_values = [
+                    [
+                        "P1-L1",
+                        "P1-L2",
+                        "P1-L3",
+                        "P1-L4",
+                        "P1-L5",
+                        "P1-L6",
+                        "P1-L7",
+                        "P2-L1",
+                    ]
+                ]
+                interpolate_val = get_interpolate_data(
+                    "data/jensen_paper/case_3_ton.csv"
+                )
+            elif request == "jensen_paper_case_3_yield":
+                foo = griddata.point
+                dim = 4
+                bounds = [[0, 7.1], [60, 600.1], [30, 110.1], [0.499, 2.5151]]
+                resolutions = [1, 54, 8, 0.2016]
+                categorical_feature_names = ["catalysts"]
+                categorical_feature_values = [
+                    [
+                        "P1-L1",
+                        "P1-L2",
+                        "P1-L3",
+                        "P1-L4",
+                        "P1-L5",
+                        "P1-L6",
+                        "P1-L7",
+                        "P2-L1",
+                    ]
+                ]
+                interpolate_val = get_interpolate_data(
+                    "data/jensen_paper/case_3_yield.csv"
+                )
+            elif request == "jensen_paper_case_4_ton":
+                foo = griddata.point
+                dim = 4
+                bounds = [[0, 7.1], [60, 600.1], [30, 110.1], [0.489, 2.511]]
+                resolutions = [1, 54, 8, 0.2021]
+                categorical_feature_names = ["catalysts"]
+                categorical_feature_values = [
+                    [
+                        "P1-L1",
+                        "P1-L2",
+                        "P1-L3",
+                        "P1-L4",
+                        "P1-L5",
+                        "P1-L6",
+                        "P1-L7",
+                        "P2-L1",
+                    ]
+                ]
+                interpolate_val = get_interpolate_data(
+                    "data/jensen_paper/case_4_ton.csv"
+                )
+            elif request == "jensen_paper_case_4_yield":
+                foo = griddata.point
+                dim = 4
+                bounds = [[0, 7.1], [60, 600.1], [30, 110.1], [0.489, 2.511]]
+                resolutions = [1, 54, 8, 0.2021]
+                categorical_feature_names = ["catalysts"]
+                categorical_feature_values = [
+                    [
+                        "P1-L1",
+                        "P1-L2",
+                        "P1-L3",
+                        "P1-L4",
+                        "P1-L5",
+                        "P1-L6",
+                        "P1-L7",
+                        "P2-L1",
+                    ]
+                ]
+                interpolate_val = get_interpolate_data(
+                    "data/jensen_paper/case_4_yield.csv"
+                )
+            # elif request == "jensen_paper_ligand_optimization":
+            #     foo = griddata.point
+            #     dim = 4
+            #     bounds = [[30, 70], [5, 15], [1.27, 10], [0.02, 0.2]]
+            #     resolutions = [1.7, 0.49, 0.44, 0.008]
+            #     categorical_feature_names = ["catalysts"]
+            #     categorical_feature_values = [
+            #         [
+            #             "P1-L1",
+            #             "P1-L2",
+            #             "P1-L3",
+            #             "P1-L4",
+            #             "P1-L5",
+            #             "P1-L6",
+            #             "P1-L7",
+            #             "P2-L1",
+            #         ]
+            #     ]
+            #     interpolate_val = get_interpolate_data(
+            #         "data/jensen_paper/ligand_optimization.csv"
+            #     )
+            elif request == "lun_data":
+                foo = griddata.point
+                dim = 3
+                bounds = [[30, 75.1], [0.01, 1.099], [0, 1.98]]
+                resolutions = [5, 0.099, 0.18]
+                interpolate_val = get_interpolate_data(
+                    "data/20240205_lun_data/benchmarking_set.csv"
+                )
+            elif request == "sugar_data_selectivity":
+                foo = griddata.point
+                dim = 3
+                bounds = [[100, 150.1], [0, 60.1], [1, 12.1]]
+                resolutions = [5, 5, 1]
+                interpolate_val = get_interpolate_data(
+                    "data/20231102_sugar_data/sugar_reaction_selectivity.csv"
+                )
+            elif request == "sugar_data_yield":
+                foo = griddata.point
+                dim = 3
+                bounds = [[100, 150.1], [0, 60.1], [1, 12.1]]
+                resolutions = [5, 5, 1]
+                interpolate_val = get_interpolate_data(
+                    "data/20231102_sugar_data/sugar_reaction_yield.csv"
                 )
             else:
                 reply = b"invalid_function"
@@ -313,6 +526,11 @@ def main():
                 result = -griddata.point(
                     interpolate_val[0], interpolate_val[1], json.loads(request)
                 )
+
+                # Placeholder until categorical support is built in to avoid
+                # flake8 complaining about unused variables
+                categorical_feature_names
+                categorical_feature_values
 
                 # Handle nan values by getting the nearest neighbor value
                 if math.isnan(result):
