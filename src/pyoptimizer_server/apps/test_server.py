@@ -1,4 +1,5 @@
 import json
+import math
 import random
 
 import numpy as np
@@ -23,6 +24,7 @@ from benchmarking.functions.sphere import sphere
 from benchmarking.functions.styblinski_tang import styblinski_tang
 from benchmarking.functions.three_hump_camel import three_hump_camel
 from data_tools.interpolate import griddata
+from data_tools.interpolate.nD_nearest import nD_nearest
 
 
 def get_interpolate_data(data_file: str):
@@ -311,6 +313,15 @@ def main():
                 result = -griddata.point(
                     interpolate_val[0], interpolate_val[1], json.loads(request)
                 )
+
+                # Handle nan values by getting the nearest neighbor value
+                if math.isnan(result):
+                    print("handling nan...")
+                    result = -nD_nearest(
+                        interpolate_val[0],
+                        interpolate_val[1],
+                        json.loads(request),
+                    )
             else:
                 result = foo(json.loads(request))
             reply = json.dumps(result).encode("utf-8")
