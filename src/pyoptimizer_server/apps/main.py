@@ -10,12 +10,12 @@ from cyrxnopt.OptimizerController import (
     install,
     set_config,
 )
+from cyrxnopt.utilities.predict_server import predict_server
+from cyrxnopt.utilities.train_server import train_server
 
 import pyoptimizer_server.config as cfg
 from pyoptimizer_server.AbortException import AbortException
 from pyoptimizer_server.helpers import zmq_helpers
-from pyoptimizer_server.helpers.predict_server import predict_server
-from pyoptimizer_server.helpers.train_server import train_server
 from pyoptimizer_server.zmq_obj_function import zmq_obj_function
 
 
@@ -43,7 +43,7 @@ def initial_handshake(
     reply = socket.recv()
     continuous_feature_names = json.loads(reply)
     print("Feature names received: {}".format(continuous_feature_names))
-    
+
     # Request bounds
     print("Sending bounds request")
     socket.send(b"bounds")
@@ -76,8 +76,10 @@ def initial_handshake(
     # Receive continuous feature names
     # reply = socket.recv()
     # categorical_feature_values = json.loads(reply)
-    # print("Categorical feature values received: {}".format(categorical_feature_values))
-    
+    # print(
+    #     f"Categorical feature values received: {categorical_feature_values}"
+    # )
+
     # Request budget
     print("Sending budget request")
     socket.send(b"budget")
@@ -134,7 +136,7 @@ def main():
         install(
             args.optimizer,
             venv_m,
-            local_paths={"amlro": "../amlo", "edboplus": "deps/edbop"},
+            local_paths={"edboplus": "deps/edbop"},
         )
     else:
         print(f"{args.optimizer} Install found. Skipping install.")
@@ -150,7 +152,7 @@ def main():
     #     # )
     if not os.path.exists(config_file):
         config = cfg.generate_default_config(
-            config_file, get_config(args.optimizer)
+            config_file, get_config(args.optimizer, venv_m)
         )
     else:
         # Read the config
@@ -165,7 +167,7 @@ def main():
 
     # opt.set_config(args.data_dir, config)
 
-    if (type(config["direction"]) is list):
+    if type(config["direction"]) is list:
         config["direction"] = config["direction"][0]
     obj_func = zmq_obj_function(socket, config["direction"])
 
@@ -210,16 +212,16 @@ def main():
             assert foo_resp == foo
 
             config = initial_handshake(socket, config, args.optimizer)
-            set_config(args.optimizer, config, round_dir, venv_m)
+            set_config(args.optimizer, venv_m, config, round_dir)
             with open(os.path.join(round_dir, "config.json")) as fin:
                 config = json.load(fin)
-            
+
             # Write initial config information
             # config = cfg.load(config_file)
             # config_file_out = os.path.join(round_dir, "config.json")
             # with open(config_file_out, "w") as fout:
             #     fout.write(json.dumps(config, indent=4))
-            
+
             prev_params = []
             yield_value = 0
             if args.training_steps > 0:
@@ -239,6 +241,8 @@ def main():
                     socket.send(b"aborted")
                     print(str(e))
                     return
+
+            config["budget"] = args.predict_steps
 
             # Run the prediction
             try:
@@ -289,15 +293,10 @@ def main():
                         "steps": len(results.history),
                     }
                 ).encode("utf-8")
-            elif args.optimizer.lower() == "amlro":
-                result_json = json.dumps(
-                    {
-                        "value": results["best_value"],
-                        "parameters": results["best_coords"],
-                        "steps": results["best_iter"],
-                    }
-                ).encode("utf-8")
-            elif args.optimizer.lower() == "edbop":
+            elif (
+                args.optimizer.lower() == "amlro"
+                or args.optimizer.lower() == "edbop"
+            ):
                 result_json = json.dumps(
                     {
                         "value": results["best_value"],
@@ -333,6 +332,7 @@ def write_results(results, config, results_file, optimizer):
         "message": "N/A",
         "raw_results": "N/A",
     }
+
     if optimizer.lower() == "nmsimplex":
         res_dict["best_coords"] = results.x.tolist()
         res_dict["best_value"] = results.fun
