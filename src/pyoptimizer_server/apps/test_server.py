@@ -1,3 +1,4 @@
+import argparse
 import json
 import math
 import random
@@ -46,7 +47,8 @@ def get_interpolate_data(data_file: str):
 def main():
     # REQUEST_TIMEOUT = 2500  # ms
     # REQUEST_RETRIES = 1
-    SERVER_ENDPOINT = "tcp://*:5555"
+    args = parse_args()
+    SERVER_ENDPOINT = f"tcp://*:{args.port}"
 
     # Create the context and socket
     context = zmq.Context(1)
@@ -553,6 +555,24 @@ def main():
 
         print("Sending reply: {}".format(reply))
         socket.send(reply)
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments"""
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--port",
+        dest="port",
+        default=5555,
+        type=int,
+        help=("Port to use. Must match the server. Defaults to 555"),
+    )
+
+    args = parser.parse_args()
+
+    return args
 
 
 if __name__ == "__main__":

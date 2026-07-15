@@ -162,7 +162,8 @@ def main():
     print("Using configuration: {}".format(config))
 
     # address = config["ip_address"] + ":" + config["port"]
-    address = "tcp://localhost:5555"
+    address = f"tcp://localhost:{args.port}"
+    print(f"Binding to {address}")
     socket = zmq_helpers.init_socket(address)
 
     # opt.set_config(args.data_dir, config)
@@ -448,6 +449,13 @@ def parse_args() -> argparse.Namespace:
         default=2,
         type=int,
         help=("Number of prediction steps to perform in each cycle."),
+    )
+    parser.add_argument(
+        "--port",
+        dest="port",
+        default=5555,
+        type=int,
+        help=("Port to use. Must match the server. Defaults to 555"),
     )
 
     args = parser.parse_args()
