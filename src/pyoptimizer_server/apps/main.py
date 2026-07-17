@@ -455,7 +455,7 @@ def parse_args() -> argparse.Namespace:
         dest="port",
         default=5555,
         type=int,
-        help=("Port to use. Must match the server. Defaults to 555"),
+        help=("Port to use. Must match the server. Defaults to 5555"),
     )
 
     args = parser.parse_args()
