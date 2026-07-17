@@ -214,6 +214,9 @@ def main():
 
             config = initial_handshake(socket, config, args.optimizer)
             set_config(args.optimizer, venv_m, config, round_dir)
+
+            # Reload the config file after setting it to validate it for
+            # the optimizer
             with open(os.path.join(round_dir, "config.json")) as fin:
                 config = json.load(fin)
 
@@ -294,10 +297,7 @@ def main():
                         "steps": len(results.history),
                     }
                 ).encode("utf-8")
-            elif (
-                args.optimizer.lower() == "amlro"
-                or args.optimizer.lower() == "edbop"
-            ):
+            elif args.optimizer.lower() in ["amlro", "edbop", "random"]:
                 result_json = json.dumps(
                     {
                         "value": results["best_value"],
