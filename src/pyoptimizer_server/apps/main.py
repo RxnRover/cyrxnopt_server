@@ -106,6 +106,9 @@ def initial_handshake(
     # config["categorical_feature_names"] = categorical_feature_names
     # config["categorical_feature_values"] = categorical_feature_values
     config["budget"] = budget
+    # We are always assuming minimizing to keep things simple. This means that
+    # the results that come back for a dataset that should be maximized will
+    # be negated from what they should be.
     config["direction"] = "min"
 
     if optimizer == "NMSimplex":

@@ -525,6 +525,8 @@ def main():
             if foo == shekel:
                 result = foo(json.loads(request), m)
             elif foo == griddata.point:
+                # We assume minimization on everything, so negate all real
+                # reactions so they effectively do maximization
                 result = -griddata.point(
                     interpolate_val[0], interpolate_val[1], json.loads(request)
                 )
