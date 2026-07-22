@@ -2,6 +2,7 @@ import argparse
 import json
 import math
 import random
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -47,6 +48,13 @@ def main():
     args = parse_args()
     SERVER_ENDPOINT = f"tcp://*:{args.port}"
 
+    # Ensure that the dataset directory exists
+    dataset_dir = Path(args.dataset_dir)
+    if not dataset_dir.is_dir():
+        raise FileNotFoundError(
+            f"Provided dataset directory does not exist! {dataset_dir}"
+        )
+
     # Create the context and socket
     context = zmq.Context(1)
     socket = context.socket(zmq.REP)
@@ -63,6 +71,8 @@ def main():
     m = 5
     bounds = [[-5.000001, 10], [0, 15]]
     resolutions = [0.1] * dim
+    categorical_feature_names = []
+    categorical_feature_values = []
     interpolate_val = None
 
     abort_count = 10000
@@ -230,13 +240,28 @@ def main():
                 dim = 2
                 bounds = [[-5, 5]] * dim
                 resolutions = [0.1] * dim
+            elif request in ["imine", "imine_reduction"]:
+                foo = griddata.point
+                dim = 3
+                bounds = [[0.05, 0.3], [0.05, 0.3], [10, 80]]
+                resolutions = [0.01, 0.01, 2.0]
+                interpolate_val = get_interpolate_data(
+                    dataset_dir / "imine_reduction/20230907_imine_data.csv"
+                )
+                # Drop dependent variable Flow 3 (column index 2); it is
+                # computed as a compensator pump to reach a total flow rate
+                # and is not controlled by the optimizer
+                interpolate_val[0] = np.delete(interpolate_val[0], 2, axis=1)
+
             elif request == "pk1":
                 foo = griddata.point
                 dim = 2
                 bounds = [[1.3, 12.9], [25, 74]]
                 resolutions = [0.1, 1]
                 interpolate_val = get_interpolate_data(
-                    "data/20230927_pk_transientflow_full_reaction_data.csv"
+                    dataset_dir
+                    / "pk1_paal_knorr_milliporesigma"
+                    / "20230927_pk1_paal_knorr_milliporesigma.csv"
                 )
             elif request == "aldol_yield_product":
                 foo = griddata.point
@@ -244,7 +269,8 @@ def main():
                 bounds = [[25, 59], [5.1, 14.9], [1.1, 9.9], [0.03, 0.19]]
                 resolutions = [1.7, 0.49, 0.44, 0.008]
                 interpolate_val = get_interpolate_data(
-                    "data/20231114_aldolcondensation_yield_product.csv"
+                    dataset_dir
+                    / "20231114_aldolcondensation_yield_product.csv"
                 )
             elif request == "aldol_yield_dba":
                 foo = griddata.point
@@ -252,7 +278,7 @@ def main():
                 bounds = [[25, 59], [5.1, 14.9], [1.1, 9.9], [0.03, 0.19]]
                 resolutions = [1.7, 0.49, 0.44, 0.008]
                 interpolate_val = get_interpolate_data(
-                    "data/20231114_aldolcondensation_yield_dba.csv"
+                    dataset_dir / "20231114_aldolcondensation_yield_dba.csv"
                 )
             elif request == "aldol_sty":
                 foo = griddata.point
@@ -260,7 +286,7 @@ def main():
                 bounds = [[25, 59], [5.1, 14.9], [1.1, 9.9], [0.03, 0.19]]
                 resolutions = [1.7, 0.49, 0.44, 0.008]
                 interpolate_val = get_interpolate_data(
-                    "data/20231114_aldolcondensation_sty.csv"
+                    dataset_dir / "20231114_aldolcondensation_sty.csv"
                 )
             elif request == "aldol_lit_sty":
                 foo = griddata.point
@@ -268,7 +294,7 @@ def main():
                 bounds = [[30, 70], [5, 15], [1.27, 10], [0.02, 0.2]]
                 resolutions = [1.7, 0.49, 0.44, 0.008]
                 interpolate_val = get_interpolate_data(
-                    "data/20231114_aldolcondensation_lit_sty.csv"
+                    dataset_dir / "20231114_aldolcondensation_lit_sty.csv"
                 )
             elif request == "aldol_lit_efactor":
                 foo = griddata.point
@@ -276,7 +302,7 @@ def main():
                 bounds = [[30, 70], [5, 15], [1.27, 10], [0.02, 0.2]]
                 resolutions = [1.7, 0.49, 0.44, 0.008]
                 interpolate_val = get_interpolate_data(
-                    "data/20231114_aldolcondensation_lit_efactor.csv"
+                    dataset_dir / "20231114_aldolcondensation_lit_efactor.csv"
                 )
             elif request == "jensen_paper_case_1_ton":
                 foo = griddata.point
@@ -297,7 +323,7 @@ def main():
                     ]
                 ]
                 interpolate_val = get_interpolate_data(
-                    "data/jensen_paper/case_1_ton.csv"
+                    dataset_dir / "jensen_paper/case_1_ton.csv"
                 )
             elif request == "jensen_paper_case_1_yield":
                 foo = griddata.point
@@ -318,7 +344,7 @@ def main():
                     ]
                 ]
                 interpolate_val = get_interpolate_data(
-                    "data/jensen_paper/case_1_yield.csv"
+                    dataset_dir / "jensen_paper/case_1_yield.csv"
                 )
             elif request == "jensen_paper_case_2_ton":
                 foo = griddata.point
@@ -339,7 +365,7 @@ def main():
                     ]
                 ]
                 interpolate_val = get_interpolate_data(
-                    "data/jensen_paper/case_2_ton.csv"
+                    dataset_dir / "jensen_paper/case_2_ton.csv"
                 )
             elif request == "jensen_paper_case_2_yield":
                 foo = griddata.point
@@ -360,7 +386,7 @@ def main():
                     ]
                 ]
                 interpolate_val = get_interpolate_data(
-                    "data/jensen_paper/case_2_yield.csv"
+                    dataset_dir / "jensen_paper/case_2_yield.csv"
                 )
             elif request == "jensen_paper_case_3_ton":
                 foo = griddata.point
@@ -381,7 +407,7 @@ def main():
                     ]
                 ]
                 interpolate_val = get_interpolate_data(
-                    "data/jensen_paper/case_3_ton.csv"
+                    dataset_dir / "jensen_paper/case_3_ton.csv"
                 )
             elif request == "jensen_paper_case_3_yield":
                 foo = griddata.point
@@ -402,7 +428,7 @@ def main():
                     ]
                 ]
                 interpolate_val = get_interpolate_data(
-                    "data/jensen_paper/case_3_yield.csv"
+                    dataset_dir / "jensen_paper/case_3_yield.csv"
                 )
             elif request == "jensen_paper_case_4_ton":
                 foo = griddata.point
@@ -423,7 +449,7 @@ def main():
                     ]
                 ]
                 interpolate_val = get_interpolate_data(
-                    "data/jensen_paper/case_4_ton.csv"
+                    dataset_dir / "jensen_paper/case_4_ton.csv"
                 )
             elif request == "jensen_paper_case_4_yield":
                 foo = griddata.point
@@ -444,7 +470,7 @@ def main():
                     ]
                 ]
                 interpolate_val = get_interpolate_data(
-                    "data/jensen_paper/case_4_yield.csv"
+                    dataset_dir / "jensen_paper/case_4_yield.csv"
                 )
             # elif request == "jensen_paper_ligand_optimization":
             #     foo = griddata.point
@@ -465,15 +491,17 @@ def main():
             #         ]
             #     ]
             #     interpolate_val = get_interpolate_data(
-            #         "data/jensen_paper/ligand_optimization.csv"
+            #         dataset_dir / "jensen_paper/ligand_optimization.csv"
             #     )
-            elif request == "lun_data":
+            elif request in ["lun_data", "pk2"]:
                 foo = griddata.point
                 dim = 3
                 bounds = [[30, 75.1], [0.01, 1.099], [0, 1.98]]
                 resolutions = [5, 0.099, 0.18]
                 interpolate_val = get_interpolate_data(
-                    "data/20240205_lun_data/benchmarking_set.csv"
+                    dataset_dir
+                    / "pk2_paal_knorr_ames"
+                    / "20240205_pk2_paal_knorr_ames.csv"
                 )
             elif request == "sugar_data_selectivity":
                 foo = griddata.point
@@ -481,7 +509,9 @@ def main():
                 bounds = [[100, 150.1], [0, 60.1], [1, 12.1]]
                 resolutions = [5, 5, 1]
                 interpolate_val = get_interpolate_data(
-                    "data/20231102_sugar_data/sugar_reaction_selectivity.csv"
+                    dataset_dir
+                    / "sugar_isomerization"
+                    / "20231102_sugar_reaction_selectivity.csv"
                 )
             elif request == "sugar_data_yield":
                 foo = griddata.point
@@ -489,7 +519,9 @@ def main():
                 bounds = [[100, 150.1], [0, 60.1], [1, 12.1]]
                 resolutions = [5, 5, 1]
                 interpolate_val = get_interpolate_data(
-                    "data/20231102_sugar_data/sugar_reaction_yield.csv"
+                    dataset_dir
+                    / "sugar_isomerization"
+                    / "20231102_sugar_reaction_yield.csv"
                 )
             else:
                 reply = b"invalid_function"
@@ -530,8 +562,8 @@ def main():
 
                 # Placeholder until categorical support is built in to avoid
                 # flake8 complaining about unused variables
-                categorical_feature_names
-                categorical_feature_values
+                categorical_feature_names = categorical_feature_names
+                categorical_feature_values = categorical_feature_values
 
                 # Handle nan values by getting the nearest neighbor value
                 if math.isnan(result):
@@ -561,6 +593,17 @@ def parse_args() -> argparse.Namespace:
 
     parser = argparse.ArgumentParser()
 
+    parser.add_argument(
+        "-d" "--dataset-dir",
+        dest="dataset_dir",
+        default="./datasets",
+        type=str,
+        help=(
+            "Directory containing the reaction dataset files to use. Must be"
+            "a flat directory containing the dataset files. Defaults to "
+            "./datasets"
+        ),
+    )
     parser.add_argument(
         "--port",
         dest="port",
