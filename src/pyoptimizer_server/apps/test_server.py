@@ -29,16 +29,13 @@ from data_tools.interpolate.nD_nearest import nD_nearest
 
 
 def get_interpolate_data(data_file: str):
-    # Loading reaction adata set
+    # Loading reaction data set
     rxn_data = pd.read_csv(data_file)
-    # rxn_data = rxn_data.drop(rxn_data.columns[2], axis=1)
+
     points = np.array(
         rxn_data.drop(rxn_data.columns[-1], axis=1).values.tolist()
     )
     values = np.array(rxn_data[rxn_data.columns[-1]].values.tolist())
-
-    # print('points',points.shape)
-    # print('values',values.shape)
 
     return [points, values]
 
