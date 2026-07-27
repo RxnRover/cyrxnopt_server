@@ -236,8 +236,6 @@ def main():
                 try:
                     prev_params, yield_value = train_server(
                         args.optimizer,
-                        [],
-                        0,
                         args.training_steps,
                         round_dir,
                         config,
