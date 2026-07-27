@@ -574,7 +574,18 @@ def main():
                         json.loads(request),
                     )
             else:
-                result = foo(json.loads(request))
+                request_list = json.loads(request)
+                if len(request_list) == 0:
+                    print(
+                        (
+                            "Received empty parameter list. "
+                            "This is likely from a training call to an "
+                            "algorithm that does not need it."
+                        )
+                    )
+                    result = 0
+                else:
+                    result = foo(json.loads(request))
             reply = json.dumps(result).encode("utf-8")
             abort_i += 1
         else:
