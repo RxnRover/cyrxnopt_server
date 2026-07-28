@@ -12,8 +12,8 @@ dependencies = [
     "pandas",
     "zmq",
     "benchmarking @ git+https://github.com/RxnRover/benchmarking@main",
-    "cyrxnopt @ git+https://github.com/RxnRover/CyRxnOpt@cli_commands",
-    "py-data-tools-zachcran @ git+ssh://git@github.com/zachcran-research/py-data-tools@main",
+    "cyrxnopt @ git+https://github.com/RxnRover/CyRxnOpt@main",
+    "py-data-tools-zachcran @ git+https://github.com/zachcran-research/py-data-tools@main",
 ]
 dynamic = ["version"]
 # Python 3.9 is the only version that worked for all 4 original optimizers.
