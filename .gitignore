@@ -58,3 +58,6 @@ tmp/
 data/
 job_script_*
 slurm-*
+
+# Local scripts
+*.sh
