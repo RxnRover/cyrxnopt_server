@@ -94,8 +94,9 @@ Where the arguments represent the following:
 Run ``run_client --help`` and ``run_server --help`` for the full list of
 options.
 
-Making Changes & Contributing
-=============================
+*******************************
+ Making Changes & Contributing
+*******************************
 
 This project uses pre-commit_, please make sure to install it before making any
 changes:
