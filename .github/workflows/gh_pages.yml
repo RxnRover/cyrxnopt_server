@@ -9,3 +9,5 @@ on:
 jobs:
   gh_pages_generation:
     uses: RxnRover/.github/.github/workflows/gh_pages_sphinx_main.yml@main
+    with:
+      python: "3.9"
