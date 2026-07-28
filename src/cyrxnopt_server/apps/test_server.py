@@ -30,7 +30,9 @@ from data_tools.interpolate import griddata
 from data_tools.interpolate.nD_nearest import nD_nearest
 
 
-def get_interpolate_data(data_file: Union[str, Path]) -> list[np.NDArray]:
+def get_interpolate_data(
+    data_file: Union[str, Path],
+) -> list[np.typing.NDArray]:
     # Loading reaction data set
     rxn_data = pd.read_csv(data_file)
 
@@ -591,7 +593,7 @@ def main() -> None:
             abort_i = 0
             reply = b"abort"
 
-        print(f"Sending reply: {reply.decode("utf-8")}")
+        print(f"Sending reply: {reply.decode('utf-8')}")
         socket.send(reply)
 
 

@@ -8,6 +8,7 @@ description = "Example benchmarking harness for CyRxnOpt algorithm testing."
 authors = [{ name = "zachcran", email = "zachcran@iastate.edu" }]
 maintainers = [{ name = "zachcran", email = "zachcran@iastate.edu" }]
 dependencies = [
+    "numpy",
     "pandas",
     "zmq",
     "benchmarking @ git+https://github.com/RxnRover/benchmarking@main",
