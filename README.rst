@@ -94,8 +94,6 @@ Where the arguments represent the following:
 Run ``run_client --help`` and ``run_server --help`` for the full list of
 options.
 
-.. _pyscaffold-notes:
-
 Making Changes & Contributing
 =============================
 
