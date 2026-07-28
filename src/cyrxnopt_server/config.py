@@ -2,7 +2,7 @@ import json
 from typing import Any, Dict
 
 
-def generate_default_config(filename: str, config_desc):
+def generate_default_config(filename: str, config_desc: dict) -> dict:
     """Generates a default configuration file.
 
     :param filename: Name of the config file, including the path and
@@ -83,16 +83,3 @@ def load(filename: str) -> Dict[str, Any]:
         fin.close()
 
     return config
-
-
-if __name__ == "__main__":
-    """Short test of generating and reading a default config file"""
-
-    # TODO: Move this test into an actual unit test
-    import os
-
-    test_file = "./test_config.json"
-
-    generate_default_config(test_file)
-    print(load(test_file))
-    os.remove(test_file)

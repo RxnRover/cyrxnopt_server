@@ -1,12 +1,156 @@
 [build-system]
-# AVOID CHANGING REQUIRES: IT WILL BE UPDATED BY PYSCAFFOLD!
-requires = ["setuptools>=46.1.0", "setuptools_scm[toml]>=5"]
+requires = ["setuptools>=64", "setuptools_scm[toml]>=8"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "cyrxnopt_server"
+description = "Example benchmarking harness for CyRxnOpt algorithm testing."
+authors = [{ name = "zachcran", email = "zachcran@iastate.edu" }]
+maintainers = [{ name = "zachcran", email = "zachcran@iastate.edu" }]
+dependencies = [
+    "pandas",
+    "zmq",
+    "benchmarking @ git+https://github.com/RxnRover/benchmarking@main",
+    "cyrxnopt @ git+https://github.com/RxnRover/CyRxnOpt@cli_commands",
+    "py-data-tools-zachcran @ git+ssh://git@github.com/zachcran-research/py-data-tools@main",
+]
+dynamic = ["version"]
+# Python 3.9 is the only version that worked for all 4 original optimizers.
+# This can and should change in the future.
+requires-python = ">=3.9, <3.10"
+license = "MIT"
+license-files = ["LICENSE.txt"]
+readme = { file = "README.rst", content-type = "text/x-rst" }
+keywords = [
+    "reaction optimization",
+    "chemistry",
+    "chemical engineering",
+    "bayesian optimization",
+    "black-box optimization",
+    "machine learning",
+    "process optimization",
+    "benchmarking",
+]
+
+classifiers = [
+    "Private :: Do Not Upload",
+
+    "Development Status :: 4 - Beta",
+    "Natural Language :: English",
+    "Typing :: Typed",
+
+    # Intended audience tags and other information about what this project is
+    "Intended Audience :: Science/Research",
+    "Environment :: Console",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+
+    # Supported Python versions and operating systems
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    # Untested, but likely works
+    # "Operating System :: MacOS :: MacOS X"
+]
+
+[project.urls]
+Documentation = "https://RxnRover.github.io/cyrxnopt_server"
+Source = "https://github.com/RxnRover/cyrxnopt_server"
+Tracker = "https://github.com/RxnRover/cyrxnopt_server/issues"
+Download = "https://github.com/RxnRover/cyrxnopt_server/archive/refs/heads/main.zip"
+Changelog = "https://github.com/RxnRover/cyrxnopt_server/releases/latest"
+
+[project.scripts]
+run_client = "cyrxnopt_server.apps.main:main"
+run_server = "cyrxnopt_server.apps.test_server:main"
+
+# Install these optional development dependencies with pip's --group flag while
+# in the project root directory.
+# Example: pip install --group dev
+[dependency-groups]
+docs = ["sphinx>=3.2.1", "sphinx_rtd_theme"]
+test = [
+    "setuptools",
+    "pytest",
+    "pytest-cov",
+    "pytest-xdist",
+    "GitPython",    # To clone functioning version of EDBO+
+]
+dev = [
+    "tox",
+    "pre-commit",
+    { include-group = "docs" },
+    { include-group = "test" },
+]
+
 [tool.setuptools_scm]
-# For smarter version schemes and other configuration options,
-# check out https://github.com/pypa/setuptools_scm
+# For more options, see https://github.com/pypa/setuptools_scm
 version_scheme = "no-guess-dev"
 
 [tool.black]
-line-length = 79
+line-length = 80
+
+[tool.docstrfmt]
+line_length = 80
+
+[tool.isort]
+profile = "black"
+known_first_party = "cyrxnopt_server"
+multi_line_output = 3
+line_length = 80
+
+[tool.pytest.ini_options]
+# Enable log display during test runs with --strict-markers
+# See: https://docs.pytest.org/en/latest/how-to/logging.html#live-logs
+addopts = "--cov cyrxnopt_server --cov-report term-missing --verbose --strict-markers"
+norecursedirs = "dist build .tox"
+testpaths = ["tests"]
+log_cli = true
+
+# Use pytest markers to select/deselect specific tests
+markers = [
+    "individual: Marks tests that need to run in an individual pytest run (deselect with '-m \"not individual\"'",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["cyrxnopt_server"]
+# omit = bad_file.py
+
+[tool.coverage.paths]
+source = ["src/", "*/site-packages/"]
+
+[tool.coverage.report]
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self\\.debug",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+] # Regexes for lines to exclude from consideration
+
+[tool.mypy]
+disallow_untyped_defs = true
+# Any changes to exclude here need to be made in .pre-commit-config.yaml, too!
+# This exclude list doesn't work because of the way pre-commit invokes mypy
+exclude = ['^setup.py$', '^build', '^venv', '^docs', '^tests']
+
+[[tool.mypy.overrides]]
+module = "cyrxnopt_server.*"
+disallow_incomplete_defs = true

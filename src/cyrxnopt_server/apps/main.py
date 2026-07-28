@@ -1,7 +1,7 @@
 import argparse
 import json
 import os
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
 from cyrxnopt.NestedVenv import NestedVenv
 from cyrxnopt.OptimizerController import (
@@ -15,12 +15,15 @@ from cyrxnopt.utilities.train_server import train_server
 from cyrxnopt.utilities.zmq import zmq_helpers
 from cyrxnopt.utilities.zmq.zmq_obj_function import zmq_obj_function
 
-import pyoptimizer_server.config as cfg
-from pyoptimizer_server.AbortException import AbortException
+import cyrxnopt_server.config as cfg
+from cyrxnopt_server.AbortException import AbortException
+
+if TYPE_CHECKING:
+    import zmq
 
 
 def initial_handshake(
-    socket, config: Dict[str, Any], optimizer: str
+    socket: "zmq.Socket", config: Dict[str, Any], optimizer: str
 ) -> Dict[str, Any]:
     """Performs the initial handshake that get initialization data before
     starting the optimization.
@@ -117,7 +120,7 @@ def initial_handshake(
     return config
 
 
-def main():
+def main() -> None:
     """Starting point for using an optimizer with zmq"""
 
     args = parse_args()
@@ -325,8 +328,10 @@ def main():
             write_results(results, config, results_file, args.optimizer)
 
 
-def write_results(results, config, results_file, optimizer):
-    res_dict = {
+def write_results(
+    results: Any, config: dict, results_file: str, optimizer: str
+) -> None:
+    res_dict: dict[str, Any] = {
         "best_coords": "N/A",
         "best_value": "N/A",
         "best_iter": "N/A",
@@ -343,9 +348,7 @@ def write_results(results, config, results_file, optimizer):
         res_dict["message"] = results.message
         res_dict["raw_results"] = results.raw_results
     elif optimizer.lower() == "nmsimplexlmfit":
-        params = [
-            value for value in list(results.params.valuesdict().values())
-        ]
+        params = [value for value in list(results.params.valuesdict().values())]
         res_dict["best_coords"] = params
         res_dict["best_value"] = 0
         res_dict["best_iter"] = results.nfev
@@ -387,7 +390,7 @@ def write_results(results, config, results_file, optimizer):
         fout.write(json.dumps(res_dict, indent=4))
 
 
-def find_optimum(results) -> int:
+def find_optimum(results: Any) -> int:
     # target = results.optpar.tolist()
     target = results.optval
 

@@ -1,4 +1,0 @@
--e ../cyrxnopt
--e ../benchmarking
--e .
-zmq

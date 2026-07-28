@@ -1,7 +1,8 @@
-Developer Information
-=====================
+#######################
+ Developer Information
+#######################
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   communication_api
+    communication_api

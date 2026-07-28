@@ -3,6 +3,7 @@ import json
 import math
 import random
 from pathlib import Path
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -29,7 +30,7 @@ from data_tools.interpolate import griddata
 from data_tools.interpolate.nD_nearest import nD_nearest
 
 
-def get_interpolate_data(data_file: str):
+def get_interpolate_data(data_file: Union[str, Path]) -> list[np.NDArray]:
     # Loading reaction data set
     rxn_data = pd.read_csv(data_file)
 
@@ -41,8 +42,7 @@ def get_interpolate_data(data_file: str):
     return [points, values]
 
 
-# TODO: Move this into a unit test, probably
-def main():
+def main() -> None:
     # REQUEST_TIMEOUT = 2500  # ms
     # REQUEST_RETRIES = 1
     args = parse_args()
@@ -69,7 +69,7 @@ def main():
     foo = branin
     dim = 2
     m = 5
-    bounds = [[-5.000001, 10], [0, 15]]
+    bounds: list[list[float]] = [[-5.000001, 10], [0, 15]]
     resolutions = [0.1] * dim
     categorical_feature_names = []
     categorical_feature_values = []
@@ -89,9 +89,6 @@ def main():
         if request == b"initial_parameters":
             abort_i = 0
 
-            # if foo == :
-            #     pass
-            # else:
             initial_params = []
             for bounds_i in bounds:
                 param = random.uniform(bounds_i[0], bounds_i[1])
@@ -269,8 +266,7 @@ def main():
                 bounds = [[25, 59], [5.1, 14.9], [1.1, 9.9], [0.03, 0.19]]
                 resolutions = [1.7, 0.49, 0.44, 0.008]
                 interpolate_val = get_interpolate_data(
-                    dataset_dir
-                    / "20231114_aldolcondensation_yield_product.csv"
+                    dataset_dir / "20231114_aldolcondensation_yield_product.csv"
                 )
             elif request == "aldol_yield_dba":
                 foo = griddata.point
@@ -553,7 +549,7 @@ def main():
         elif type(json.loads(request)) == list:
             if foo == shekel:
                 result = foo(json.loads(request), m)
-            elif foo == griddata.point:
+            elif interpolate_val is not None and foo == griddata.point:
                 # We assume minimization on everything, so negate all real
                 # reactions so they effectively do maximization
                 result = -griddata.point(
@@ -589,13 +585,13 @@ def main():
             reply = json.dumps(result).encode("utf-8")
             abort_i += 1
         else:
-            print("Invalid request: {}".format(request))
+            print(f"Invalid request: {request}")
 
         if abort_i >= abort_count:
             abort_i = 0
             reply = b"abort"
 
-        print("Sending reply: {}".format(reply))
+        print(f"Sending reply: {reply.decode("utf-8")}")
         socket.send(reply)
 
 
