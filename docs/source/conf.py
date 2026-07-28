@@ -18,7 +18,7 @@ __location__ = os.path.dirname(__file__)
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.join(__location__, "../src"))
+sys.path.insert(0, os.path.join(__location__, "../../src"))
 
 # -- Run sphinx-apidoc -------------------------------------------------------
 # This hack is necessary since RTD does not issue `sphinx-apidoc` before running
@@ -34,7 +34,7 @@ except ImportError:
     from sphinx import apidoc
 
 output_dir = os.path.join(__location__, "api")
-module_dir = os.path.join(__location__, "../src/pyoptimizer_server")
+module_dir = os.path.join(__location__, "../../src/cyrxnopt_server")
 try:
     shutil.rmtree(output_dir)
 except FileNotFoundError:
@@ -89,8 +89,8 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "pyoptimizer_server"
-copyright = "2023, zachcran"
+project = "cyrxnopt_server"
+copyright = "2023, 2026 zachcran"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -101,7 +101,7 @@ copyright = "2023, zachcran"
 # If you don’t need the separation provided between version and release,
 # just set them both to the same value.
 try:
-    from pyoptimizer_server import __version__ as version
+    from cyrxnopt_server import __version__ as version
 except ImportError:
     version = ""
 
@@ -157,12 +157,12 @@ todo_emit_warnings = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = "alabaster"
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {"sidebar_width": "300px", "page_width": "1200px"}
+# html_theme_options = {"sidebar_width": "300px", "page_width": "1200px"}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
@@ -230,7 +230,7 @@ html_static_path = ["_static"]
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "pyoptimizer_server-doc"
+htmlhelp_basename = "cyrxnopt_server-doc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -250,7 +250,7 @@ latex_documents = [
     (
         "index",
         "user_guide.tex",
-        "pyoptimizer_server Documentation",
+        "cyrxnopt_server Documentation",
         "zachcran",
         "manual",
     )

@@ -42,9 +42,9 @@ coverage.xml
 build/*
 dist/*
 sdist/*
-docs/api/*
 docs/_rst/*
-docs/_build/*
+docs/build/*
+docs/source/api/*
 cover/*
 MANIFEST
 

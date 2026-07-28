@@ -1,8 +1,8 @@
-####################
- pyoptimizer_server
-####################
+#################
+ cyrxnopt_server
+#################
 
-This is the documentation of **pyoptimizer_server**.
+This is the documentation of **cyrxnopt_server**.
 
 .. note::
 
@@ -29,7 +29,7 @@ This is the documentation of **pyoptimizer_server**.
     :maxdepth: 2
 
     Overview <readme>
-    Contributions & Help <contributing>
+    Developers <developer/index>
     License <license>
     Authors <authors>
     Changelog <changelog>
