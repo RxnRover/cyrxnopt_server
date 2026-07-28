@@ -9,17 +9,18 @@
 #################
 
     Example benchmarking harness for `CyRxnOpt
-    <https://github.com/RxnRover/CyRxnOpt>`_ algorithm testing.
+    <https://github.com/RxnRover/CyRxnOpt>`__ algorithm testing.
 
 This project provides a ZeroMQ-based client/server pair for benchmarking
 optimization algorithms via CyRxnOpt against a shared set of benchmarking
 functions. Analytical functions can be found in the `benchmarking repository
-<https://github.com/RxnRover/benchmarking>`_ Real chemical reaction datasets are
-used from `cyrxnopt_datasets <https://github.com/RxnRover/cyrxnopt_datasets>`_,
-interpolated from recorded reaction data. The server (``run_server``) hosts the
-objective functions and answers optimizer queries while the client
-(``run_client``) drives a CyRxnOpt optimizer through training and prediction
-cycles against the server and records the results.
+<https://github.com/RxnRover/benchmarking>`__ Real chemical reaction datasets
+are used from `cyrxnopt_datasets
+<https://github.com/RxnRover/cyrxnopt_datasets>`__, interpolated from recorded
+reaction data. The server (``run_server``) hosts the objective functions and
+answers optimizer queries while the client (``run_client``) drives a CyRxnOpt
+optimizer through training and prediction cycles against the server and records
+the results.
 
 **************
  Installation
@@ -43,7 +44,7 @@ Clone the repository and install it with pip:
 Some of the server's benchmarking functions interpolate real reaction data (like
 ``imine``, ``pk1``, ``pk2``, and ``sugar_data_yield``). The CSV datasets for
 these live in a separate repository, `cyrxnopt_datasets
-<https://github.com/RxnRover/cyrxnopt_datasets/tree/main/datasets>`_. Clone it
+<https://github.com/RxnRover/cyrxnopt_datasets/tree/main/datasets>`__. Clone it
 and point ``run_server`` at the ``datasets`` directory:
 
 .. code-block:: bash
