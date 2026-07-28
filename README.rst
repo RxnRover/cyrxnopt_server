@@ -1,8 +1,14 @@
+.. image:: https://img.shields.io/badge/Documentation-grey
+    :alt: Documentation link
+    :target: https://rxnrover.github.io/cyrxnopt_server/
+
 .. image:: https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold
     :alt: Project generated with PyScaffold
     :target: https://pyscaffold.org/
 
-|
+.. image:: https://img.shields.io/badge/Python-3.9-blue
+    :alt: Documentation link
+    :target: https://rxnrover.github.io/CyRxnOpt/
 
 #################
  cyrxnopt_server
