@@ -1,8 +1,8 @@
-exclude: '^docs/conf.py'
+exclude: '^docs/source/conf.py'
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v6.0.0
   hooks:
   - id: trailing-whitespace
   - id: check-added-large-files
@@ -17,38 +17,42 @@ repos:
   - id: mixed-line-ending
     args: ['--fix=auto']  # replace 'auto' with 'lf' to enforce Linux/Mac line endings or 'crlf' for Windows
 
-## If you want to avoid flake8 errors due to unused vars or imports:
-# - repo: https://github.com/myint/autoflake
-#   rev: v1.4
-#   hooks:
-#   - id: autoflake
-#     args: [
-#       --in-place,
-#       --remove-all-unused-imports,
-#       --remove-unused-variables,
-#     ]
-
 - repo: https://github.com/pycqa/isort
-  rev: 5.12.0
+  rev: 9.0.0b1
   hooks:
   - id: isort
 
 - repo: https://github.com/psf/black
-  rev: 23.3.0
+  rev: 26.5.1
   hooks:
   - id: black
     language_version: python3
 
-## If like to embrace black styles even in the docs:
-# - repo: https://github.com/asottile/blacken-docs
-#   rev: v1.12.0
-#   hooks:
-#   - id: blacken-docs
-#     additional_dependencies: [black]
+- repo: https://github.com/LilSpazJoekp/docstrfmt
+  rev: v2.2.0
+  hooks:
+    - id: docstrfmt
+      language_version: python3
+      types_or: [rst]  # Options are [python, rst, txt]
 
 - repo: https://github.com/PyCQA/flake8
-  rev: 6.0.0
+  rev: 7.3.0
   hooks:
   - id: flake8
   ## You can add flake8 plugins via `additional_dependencies`:
   #  additional_dependencies: [flake8-bugbear]
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v2.3.0
+  hooks:
+    - id: mypy
+      args: [--ignore-missing-imports, "--config-file=pyproject.toml"]
+      # NOTE: Any changes to exclude here need to be made in pyproject.toml, too!
+      exclude: |
+        (?x)(
+          ^setup.py$ |
+          ^build |
+          ^venv |
+          ^docs |
+          ^tests
+        )

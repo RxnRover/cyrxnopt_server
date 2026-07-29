@@ -1,4 +1,0 @@
--e ../pyoptimizer_backend
--e ../benchmarking
--e .
-zmq

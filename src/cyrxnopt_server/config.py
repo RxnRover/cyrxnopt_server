@@ -2,7 +2,7 @@ import json
 from typing import Any, Dict
 
 
-def generate_default_config(filename: str, config_desc):
+def generate_default_config(filename: str, config_desc: dict) -> dict:
     """Generates a default configuration file.
 
     :param filename: Name of the config file, including the path and
@@ -15,7 +15,7 @@ def generate_default_config(filename: str, config_desc):
     config = {}
     for option in config_desc:
         option_name = str(option["name"])
-        option_type = str(option["type"])
+        option_type = str(option["type"]).lower()
         option_value = option["value"]
 
         default_value = option_value
@@ -24,13 +24,13 @@ def generate_default_config(filename: str, config_desc):
 
         # Entries that are prefixed by "continuous" or "categorical" need
         # to be split up
-        if "continuous" in option_name or "categorical" in option_name:
-            name_parts = option_name.split("_")
-            if not name_parts[0] in config:
-                config[name_parts[0]] = {}
-            config[name_parts[0]]["_".join(name_parts[1:])] = default_value
-        else:
-            config[option_name] = default_value
+        # if "continuous" in option_name or "categorical" in option_name:
+        #     name_parts = option_name.split("_")
+        #     if not name_parts[0] in config:
+        #         config[name_parts[0]] = {}
+        #     config[name_parts[0]]["_".join(name_parts[1:])] = default_value
+        # else:
+        config[option_name] = default_value
 
     try:
         fout = open(filename, "w")
@@ -83,16 +83,3 @@ def load(filename: str) -> Dict[str, Any]:
         fin.close()
 
     return config
-
-
-if __name__ == "__main__":
-    """Short test of generating and reading a default config file"""
-
-    # TODO: Move this test into an actual unit test
-    import os
-
-    test_file = "./test_config.json"
-
-    generate_default_config(test_file)
-    print(load(test_file))
-    os.remove(test_file)

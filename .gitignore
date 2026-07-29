@@ -42,16 +42,22 @@ coverage.xml
 build/*
 dist/*
 sdist/*
-docs/api/*
 docs/_rst/*
-docs/_build/*
+docs/build/*
+docs/source/api/*
 cover/*
 MANIFEST
 
 # Per-project virtualenvs
-.venv*/
-.conda*/
+**/*venv*/
+**/*conda*/
 .python-version
 
 # Common local testing
 tmp/
+data/
+job_script_*
+slurm-*
+
+# Local scripts
+*.sh

@@ -1,5 +1,5 @@
-============
-Contributors
-============
+##############
+ Contributors
+##############
 
-* zachcran <zachcran@gmail.com>
+- zachcran <zachcran@iastate.edu>
